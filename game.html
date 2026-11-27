@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d91">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PLN Hero">
+<title>PLN Hero – Petugas Listrik (Prototype)</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b1830;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#0f172a;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+#app{position:relative;width:100%;max-width:520px;height:100vh;height:100dvh;margin:0 auto;overflow:hidden;background:#6fbf6a}
+canvas#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hidden{display:none!important}
+button{font:inherit;cursor:pointer;border:0}
+/* HUD */
+#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 8px) 8px 0;pointer-events:none;z-index:5}
+.hud-row{display:flex;gap:6px}
+.chip{background:rgba(11,61,145,.92);color:#fff;border-radius:12px;padding:5px 10px;display:flex;flex-direction:column;min-width:64px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.chip.grow{flex:1;min-width:0}
+.chip .lbl{font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip b{font-size:15px;line-height:1.2}
+.bar{height:7px;background:rgba(255,255,255,.25);border-radius:4px;margin-top:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#ffd400;border-radius:4px;transition:width .4s}
+#objective{margin-top:6px;background:rgba(255,255,255,.95);border-radius:12px;padding:7px 10px;display:flex;align-items:center;gap:8px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+#objText{flex:1;line-height:1.25}
+#hTimer{background:#0b3d91;color:#ffd400;border-radius:8px;padding:3px 8px;font-variant-numeric:tabular-nums}
+#hTimer.warn{background:#dc2626;color:#fff;animation:blink .6s infinite alternate}
+@keyframes blink{to{opacity:.5}}
+#proto{position:absolute;right:6px;bottom:calc(env(safe-area-inset-bottom) + 4px);font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.8);background:rgba(0,0,0,.35);padding:2px 6px;border-radius:6px;z-index:4;pointer-events:none}
+#btnPhone{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 28px);width:66px;height:66px;border-radius:50%;background:#0b3d91;color:#fff;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.35);z-index:6;border:3px solid #ffd400}
+#btnPhone .ico{font-size:24px;line-height:1}
+.dot{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#ef4444;border-radius:50%;border:2px solid #fff;animation:blink .7s infinite alternate}
+#btnAct{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 106px);min-width:130px;padding:14px 16px;border-radius:30px;background:#ffd400;color:#0b3d91;font-weight:800;font-size:16px;box-shadow:0 4px 12px rgba(0,0,0,.35);z-index:6;animation:pulse 1s infinite alternate}
+@keyframes pulse{to{transform:scale(1.06)}}
+#toast{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 180px);background:rgba(15,23,42,.92);color:#fff;padding:10px 12px;border-radius:12px;font-size:13px;z-index:8;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none}
+/* Screens */
+.screen{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(8,20,45,.55)}
+#start{background:linear-gradient(160deg,#0b3d91 0%,#1565c0 55%,#0b3d91 100%)}
+.start-card{text-align:center;color:#fff;max-width:360px;width:100%}
+.logo{display:inline-block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));animation:float 2s ease-in-out infinite alternate}
+@keyframes float{to{transform:translateY(-8px)}}
+h1{margin:6px 0 0;font-size:42px;letter-spacing:1px;color:#ffd400;text-shadow:0 3px 0 #082a66}
+h2{margin:0;font-size:18px;font-weight:600;opacity:.95}
+.badge{display:inline-block;margin-top:8px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;letter-spacing:2px;padding:3px 10px;border-radius:20px}
+.tagline{font-size:14px;line-height:1.45;opacity:.92;margin:14px 4px}
+.big{display:block;width:100%;padding:14px;border-radius:14px;background:#ffd400;color:#0b3d91;font-weight:800;font-size:18px;margin-top:10px;box-shadow:0 4px 0 #b39500}
+.big:active{transform:translateY(2px);box-shadow:0 2px 0 #b39500}
+.ghost{display:block;width:100%;padding:11px;border-radius:12px;background:rgba(255,255,255,.15);color:inherit;font-weight:700;margin-top:10px;border:1px solid rgba(255,255,255,.35)}
+.card .ghost,.phone .ghost{background:#e2e8f0;color:#0f172a;border:0}
+.start-tip{margin-top:16px;background:rgba(255,255,255,.12);border-radius:12px;padding:10px;font-size:12.5px;line-height:1.4;display:flex;gap:10px;align-items:center;text-align:left}
+.small{font-size:11px;opacity:.75;margin-top:10px}
+.card{background:#fff;border-radius:18px;padding:16px;width:100%;max-width:400px;max-height:100%;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card h3{margin:0 0 10px;color:#0b3d91}
+.tut-list{padding-left:20px;margin:0;font-size:14px;line-height:1.45}
+.tut-list li{margin-bottom:7px}
+/* phone */
+.phone{background:#111827;border-radius:28px;padding:10px;width:100%;max-width:380px;height:min(640px,100%);display:flex;flex-direction:column;border:3px solid #374151;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.phone-top{display:flex;justify-content:space-between;color:#fff;font-size:12px;padding:2px 10px 6px}
+.tabs{display:flex;gap:4px;background:#1f2937;border-radius:12px;padding:4px}
+.tabs button{flex:1;padding:8px 4px;border-radius:9px;background:transparent;color:#cbd5e1;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:4px}
+.tabs button.on{background:#ffd400;color:#0b3d91}
+.ph-body{flex:1;overflow-y:auto;background:#f1f5f9;border-radius:14px;margin-top:8px;padding:10px;font-size:13.5px}
+.mcard{background:#fff;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.12);border-left:5px solid #0b3d91}
+.mcard h4{margin:0 0 4px;font-size:14px}
+.mcard p{margin:2px 0 6px;color:#334155;line-height:1.35}
+.mcard .meta{display:flex;gap:8px;font-size:11.5px;color:#475569;flex-wrap:wrap}
+.mcard button,.btn{background:#0b3d91;color:#fff;font-weight:700;padding:9px 12px;border-radius:10px;margin-top:6px}
+.btn.warn{background:#dc2626}
+.via{display:inline-flex;align-items:center;gap:4px;background:#e0f2fe;color:#075985;border-radius:8px;padding:1px 6px;font-size:11px;font-weight:700}
+/* generic phone icon for "PLN Mobile" (not an official logo) */
+.pm-ico{display:inline-block;width:16px;height:24px;border:2.5px solid currentColor;border-radius:4px;position:relative;vertical-align:middle;flex:none}
+.pm-ico::after{content:"";position:absolute;left:50%;bottom:1px;width:4px;height:2px;margin-left:-2px;background:currentColor;border-radius:1px}
+.pm-ico.sm{width:11px;height:16px;border-width:2px}
+.pm-ico.lg{width:34px;height:52px;border-width:4px;border-radius:7px;color:#0b3d91}
+.pm-head{display:flex;gap:10px;align-items:center;background:#0b3d91;color:#fff;border-radius:12px;padding:10px;margin-bottom:8px}
+.pm-head .pm-ico{color:#ffd400}
+.pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pm-tile{background:#fff;border-radius:12px;padding:10px;text-align:left;font-size:12.5px;box-shadow:0 1px 3px rgba(0,0,0,.12);color:#0f172a}
+.pm-tile b{display:block;font-size:13.5px;margin:3px 0}
+.pm-tile .e{font-size:22px}
+.note{font-size:11px;color:#64748b;margin-top:8px;line-height:1.35}
+/* minigame */
+.mg-card{display:flex;flex-direction:column;max-height:100%;padding:0;overflow:hidden}
+.mg-head{background:#0b3d91;color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800}
+#mgStep{font-size:12px;background:#ffd400;color:#0b3d91;border-radius:10px;padding:2px 8px;white-space:nowrap}
+.mg-body{padding:14px;overflow-y:auto;font-size:14px;line-height:1.4}
+.npc{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.ava{width:44px;height:44px;border-radius:50%;background:#fde68a;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.bubble{background:#f1f5f9;border-radius:12px;padding:8px 10px;font-size:13.5px;position:relative}
+.q{font-weight:800;margin:10px 0 8px}
+.opts{display:grid;gap:8px}
+.opt{background:#f1f5f9;border:2px solid #cbd5e1;border-radius:12px;padding:11px;text-align:left;font-weight:600;color:#0f172a}
+.opt.right{background:#dcfce7;border-color:#16a34a}
+.opt.wrong{background:#fee2e2;border-color:#dc2626}
+.opt.done{background:#dcfce7;border-color:#16a34a;opacity:.8}
+.explain{margin-top:10px;background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:8px 10px;font-size:13px}
+.nextb{display:block;width:100%;margin-top:12px;padding:12px;border-radius:12px;background:#0b3d91;color:#fff;font-weight:800;font-size:15px}
+.info{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;margin:8px 0;font-size:13px}
+.info table{width:100%;border-collapse:collapse}
+.info td{padding:3px 2px;border-bottom:1px dashed #e2e8f0}
+.info td:last-child{text-align:right;font-weight:700}
+.docs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.doc{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:8px;font-size:12px}
+.doc b{display:block;color:#92400e;font-size:12.5px}
+.doc.bad{background:#fff1f2;border-color:#fda4af}
+.lcd{font-family:"Courier New",monospace;background:#9fbf8f;color:#1b2a17;font-size:30px;letter-spacing:4px;text-align:center;border-radius:8px;padding:8px;border:4px solid #374151;margin:8px auto;max-width:260px;box-shadow:inset 0 0 10px rgba(0,0,0,.25)}
+.meterbox{display:flex;justify-content:center;margin:6px 0}
+.wires{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.wire{padding:14px 8px;border-radius:12px;color:#fff;font-weight:800;border:3px solid rgba(0,0,0,.15)}
+.term{display:flex;gap:6px;justify-content:center;margin:6px 0}
+.term span{width:52px;height:40px;border-radius:8px;border:2px dashed #94a3b8;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#64748b}
+.term span.fill{border-style:solid;color:#fff}
+.board{background:#e2e8f0;border-radius:12px;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slot{min-height:64px;border:2px dashed #64748b;border-radius:10px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11.5px;text-align:center;padding:4px;color:#475569}
+.slot.ok{border-style:solid;border-color:#16a34a;background:#dcfce7;color:#14532d;font-weight:700}
+.slot.hover{background:#fef9c3}
+.parts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;justify-content:center}
+.part{background:#0b3d91;color:#fff;border-radius:10px;padding:10px 12px;font-weight:700;font-size:13px;touch-action:none}
+.part.sel{outline:3px solid #ffd400}
+.part.used{visibility:hidden}
+.drag-ghost{position:fixed;z-index:100;pointer-events:none;opacity:.9;transform:translate(-50%,-50%) scale(1.08)}
+.act{display:flex;align-items:center;gap:8px;width:100%}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-5px)}}
+.sum-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:14px}
+.sum-row.neg b{color:#dc2626}
+.sum-row.tot{font-size:17px;border-bottom:0}
+.rankup{background:#fef3c7;border-radius:12px;padding:10px;margin:10px 0;text-align:center;font-weight:800;color:#92400e}
+.tipbox{display:flex;gap:10px;align-items:center;background:#e0f2fe;border-radius:12px;padding:9px;margin-top:10px;font-size:12.5px;color:#075985;line-height:1.35}
+.tipbox .pm-ico{color:#0b3d91}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="cv"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-row">
+      <div class="chip"><span class="lbl">Poin</span><b id="hPts">0</b></div>
+      <div class="chip grow"><span class="lbl" id="hRank">Petugas Magang</span><div class="bar"><i id="hBar"></i></div></div>
+      <div class="chip"><span class="lbl">Saldo</span><b id="hMoney">Rp0</b></div>
+    </div>
+    <div id="objective" class="hidden"><span id="objIcon">⚡</span><span id="objText"></span><b id="hTimer">0:00</b></div>
+  </div>
+  <div id="proto">PROTOTYPE</div>
+  <button id="btnPhone" class="hidden" aria-label="Buka HP"><span class="ico">📱</span><span>HP</span><i id="phoneDot" class="dot hidden"></i></button>
+  <button id="btnAct" class="hidden">Mulai</button>
+  <div id="toast" class="hidden"></div>
+
+  <!-- Start screen -->
+  <div id="start" class="screen">
+    <div class="start-card">
+      <div class="logo"><svg viewBox="0 0 64 64" width="84" height="84"><circle cx="32" cy="32" r="30" fill="#ffd400"/><path d="M36 6 L16 36 H30 L26 58 L48 26 H34 Z" fill="#0b3d91"/></svg></div>
+      <h1>PLN Hero</h1>
+      <h2>Petugas Listrik</h2>
+      <span class="badge">Prototype</span>
+      <p class="tagline">Naik motor dinas, selesaikan misi lapangan: cari gangguan, pasang baru, tambah daya, catat meter, dan cek pelanggan besar.</p>
+      <button id="btnStart" class="big">▶ Mulai Main</button>
+      <button id="btnTut" class="ghost">📖 Cara Main</button>
+      <div class="start-tip" id="startTip"></div>
+      <div class="small" id="startStats"></div>
+    </div>
+  </div>
+
+  <!-- Tutorial -->
+  <div id="tut" class="screen hidden">
+    <div class="card">
+      <h3>📖 Cara Main</h3>
+      <ol class="tut-list">
+        <li><b>Gerak:</b> sentuh &amp; geser jempol di layar (joystick). Di laptop: tombol panah / WASD.</li>
+        <li><b>Ambil misi:</b> buka <b>📱 HP</b> → tab <b>Misi</b> → pilih misi. Sebagian permohonan masuk lewat aplikasi <b>PLN Mobile</b> di HP-mu.</li>
+        <li><b>Ikuti penanda kuning</b> dan panah di tepi layar. Perhatikan <b>waktu</b> misi!</li>
+        <li><b>Sampai di lokasi:</b> tekan tombol <b>Mulai</b> (atau Spasi/E), lalu kerjakan mini-game langkah demi langkah.</li>
+        <li><b>Utamakan K3:</b> pakai APD dan padamkan jaringan sebelum perbaikan. Melanggar = poin dikurangi.</li>
+        <li>Kumpulkan poin untuk naik pangkat dari <b>Petugas Magang</b> sampai <b>Supervisor</b>. Progres tersimpan otomatis.</li>
+      </ol>
+      <button id="btnTutClose" class="big">Siap, Gas!</button>
+    </div>
+  </div>
+
+  <!-- Phone -->
+  <div id="phone" class="screen hidden">
+    <div class="phone">
+      <div class="phone-top"><span id="phClock">08:00</span><span>📶 🔋</span></div>
+      <div class="tabs">
+        <button data-tab="misi" class="on">Misi</button>
+        <button data-tab="plnm"><span class="pm-ico sm"></span>PLN Mobile</button>
+        <button data-tab="prof">Profil</button>
+      </div>
+      <div id="phBody" class="ph-body"></div>
+      <button id="btnPhoneClose" class="ghost">Tutup HP</button>
+    </div>
+  </div>
+
+  <!-- Mini game -->
+  <div id="mg" class="screen hidden">
+    <div class="card mg-card">
+      <div class="mg-head"><div id="mgTitle"></div><div id="mgStep"></div></div>
+      <div id="mgBody" class="mg-body"></div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div id="sum" class="screen hidden">
+    <div class="card">
+      <h3 id="sumTitle">Misi Selesai!</h3>
+      <div id="sumBody"></div>
+      <button id="btnSumOk" class="big">Lanjut</button>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+/* Efek suara sederhana dengan WebAudio (tanpa file audio). */
+const Sfx = {
+  ctx: null, enabled: true,
+  init() {
+    try {
+      if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); }
+      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) { /* audio tidak tersedia */ }
+  },
+  tone(f, d, type = 'square', vol = 0.07, when = 0, slide = 0) {
+    if (!this.enabled || !this.ctx) return;
+    const t = this.ctx.currentTime + when;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.linearRampToValueAtTime(Math.max(30, f + slide), t + d);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t + d + 0.03);
+  },
+  click() { this.tone(700, 0.05, 'square', 0.05); },
+  ok() { this.tone(660, 0.08); this.tone(990, 0.12, 'square', 0.07, 0.08); },
+  bad() { this.tone(240, 0.28, 'sawtooth', 0.08, 0, -120); },
+  win() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.06, i * 0.1)); },
+  fail() { [392, 330, 262].forEach((f, i) => this.tone(f, 0.22, 'triangle', 0.08, i * 0.15)); },
+  notif() { this.tone(880, 0.08, 'sine', 0.1); this.tone(1320, 0.12, 'sine', 0.1, 0.1); },
+  zap() { this.tone(110, 0.3, 'sawtooth', 0.09, 0, 500); },
+  tick() { this.tone(1200, 0.03, 'sine', 0.04); },
+  rank() { [523, 659, 784, 1046, 1318].forEach((f, i) => this.tone(f, 0.2, 'triangle', 0.08, i * 0.12)); }
+};
+
+</script>
+<script>
+'use strict';
+/* Peta kota kecil: jalan, bangunan, tiang, trafo, jaringan, pohon, NPC. Semua digambar dengan canvas. */
+const World = (() => {
+  const W = 1000, H = 1500, RW = 64;
+  const ROADS_V = [120, 500, 880], ROADS_H = [140, 520, 900, 1300];
+  const NAMES = ['Pak Budi','Bu Sari','Pak Joko','Bu Wati','Pak Hasan','Bu Rina','Pak Agus','Bu Dewi','Pak Slamet','Bu Ani',
+    'Pak Rudi','Bu Lilis','Pak Dedi','Bu Yuni','Pak Imam','Bu Ratna','Pak Teguh','Bu Nur','Pak Eko','Bu Fitri','Pak Bambang','Bu Siti','Pak Yusuf','Bu Endang'];
+  const ROOFS = ['#e76f51','#f4a261','#2a9d8f','#8d6e63','#e9c46a','#d62828','#6d597a','#457b9d','#bc6c25'];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  const B = []; let hn = 0;
+  function bld(x, y, w, h, type, name) {
+    const b = { x, y, w, h, type, id: B.length, roof: ROOFS[B.length % ROOFS.length] };
+    if (type === 'house') { b.owner = NAMES[hn++ % NAMES.length]; b.name = 'Rumah ' + b.owner; } else b.name = name;
+    B.push(b); return b;
+  }
+  // Blok A
+  bld(175,190,160,110,'office','Posko ULP');
+  bld(360,195,90,75,'house'); bld(175,380,90,80,'house'); bld(290,390,80,75,'house'); bld(385,380,70,90,'shop','Toko Kelontong');
+  // Blok B
+  bld(550,190,85,75,'house'); bld(655,190,85,75,'house'); bld(760,190,75,75,'house');
+  bld(550,380,110,85,'shop','Warung Kopi'); bld(690,385,140,80,'shop','Bengkel Motor');
+  // Blok C
+  bld(175,570,140,100,'shop','Minimarket'); bld(345,575,100,80,'house'); bld(175,760,90,85,'house'); bld(290,770,80,80,'house'); bld(385,760,70,90,'house');
+  // Blok D
+  const hotel = bld(560,575,260,270,'hotel','Hotel Tanjung Asri');
+  // Blok E
+  bld(175,950,90,80,'house'); bld(290,950,80,80,'house'); bld(385,950,70,80,'house');
+  bld(175,1160,90,85,'house'); bld(290,1160,80,85,'house'); bld(385,1150,70,95,'house');
+  // Blok F
+  bld(555,950,90,80,'house'); bld(665,950,80,80,'house'); bld(760,950,75,80,'house'); bld(560,1140,260,110,'school','Sekolah Dasar');
+  // Bawah
+  bld(170,1360,90,80,'house'); bld(300,1360,90,80,'house'); bld(560,1360,90,80,'house'); bld(700,1360,90,80,'house');
+
+  B.forEach(b => {
+    const cx = b.x + b.w / 2, cy = b.y + b.h / 2; let best = null;
+    ROADS_H.forEach(ry => { const top = ry < cy, e = top ? b.y : b.y + b.h, d = Math.abs(ry - e);
+      if (!best || d < best.d) best = { d, x: cx, y: top ? b.y - 16 : b.y + b.h + 16, side: top ? 'n' : 's' }; });
+    ROADS_V.forEach(rx => { const left = rx < cx, e = left ? b.x : b.x + b.w, d = Math.abs(rx - e);
+      if (!best || d < best.d) best = { d, x: left ? b.x - 16 : b.x + b.w + 16, y: cy, side: left ? 'w' : 'e' }; });
+    b.door = { x: best.x, y: best.y, side: best.side };
+  });
+
+  // Tiang & jaringan (sisi utara tiap jalan horizontal)
+  const P = [];
+  ROADS_H.forEach((ry, li) => {
+    for (let x = 60; x <= 950; x += 110) {
+      if (ROADS_V.some(rx => Math.abs(rx - x) < 44)) continue;
+      P.push({ x, y: ry - 42, line: li, trafo: false, id: P.length });
+    }
+  });
+  [[310, 520], [690, 900], [310, 1300], [690, 140], [310, 900]].forEach(([tx, ty]) => {
+    let best = null; P.forEach(p => { const d = Math.hypot(p.x - tx, p.y - ty); if (!best || d < best.d) best = { d, p }; });
+    best.p.trafo = true; best.p.name = 'Gardu Trafo ' + String.fromCharCode(65 + P.filter(q => q.trafo).length - 1);
+  });
+  P.forEach(p => { if (!p.name) p.name = 'Tiang No. ' + (100 + p.id); });
+
+  // Pohon
+  const T = [];
+  for (let y = 20; y < H; y += 55) { T.push({ x: 30 + rnd() * 40, y: y + rnd() * 20, r: 14 + rnd() * 8 }); T.push({ x: 930 + rnd() * 40, y: y + rnd() * 20, r: 14 + rnd() * 8 }); }
+  [[440,300],[460,690],[210,1100],[440,1100],[640,1100],[800,1100],[850,700],[850,420],[450,1450],[880,1450],[640,1460]].forEach(([x, y]) => T.push({ x, y, r: 16 + rnd() * 6 }));
+
+  const NPCS = [
+    { x: 440, y: 178, name: 'Pak RT', emo: '👨', line: 'Warga sini kalau listrik padam sekarang lapor lewat aplikasi PLN Mobile, katanya lebih cepat tercatat.' },
+    { x: 610, y: 556, name: 'Mbak Ayu', emo: '👩', line: 'Saya beli token listrik lewat PLN Mobile, nggak perlu keluar rumah.' },
+    { x: 230, y: 938, name: 'Mas Dimas', emo: '🧑', line: 'Cek tagihan bulanan sekarang bisa di PLN Mobile, Pak Petugas!' },
+    { x: 760, y: 1338, name: 'Bu Kantin', emo: '👵', line: 'Anak saya ajukan tambah daya lewat PLN Mobile, tinggal tunggu petugas datang.' },
+    { x: 538, y: 720, name: 'Satpam Hotel', emo: '💂', line: 'Selamat datang di Hotel Tanjung Asri. Panel listrik ada di ruang belakang.' },
+    { x: 140, y: 1180, name: 'Pak Tani', emo: '👴', line: 'Mau pasang listrik baru buat rumah anak, katanya daftar bisa dari PLN Mobile ya?' }
+  ];
+
+  function collides(x, y, r) {
+    if (x < r || y < r || x > W - r || y > H - r) return true;
+    for (const b of B) {
+      const nx = Math.max(b.x, Math.min(x, b.x + b.w)), ny = Math.max(b.y, Math.min(y, b.y + b.h));
+      if ((x - nx) ** 2 + (y - ny) ** 2 < r * r) return true;
+    }
+    return false;
+  }
+
+  // ---------- Gambar ----------
+  function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+
+  function drawGround(c) {
+    c.fillStyle = '#74c069'; c.fillRect(0, 0, W, H);
+    c.fillStyle = 'rgba(255,255,255,.06)';
+    for (let i = 0; i < 260; i++) { const x = (i * 97) % W, y = (i * 211) % H; c.fillRect(x, y, 3, 3); }
+    // trotoar
+    c.fillStyle = '#d6d3c4';
+    ROADS_H.forEach(y => c.fillRect(0, y - RW / 2 - 8, W, RW + 16));
+    ROADS_V.forEach(x => c.fillRect(x - RW / 2 - 8, 0, RW + 16, H));
+    c.fillStyle = '#4b5563';
+    ROADS_H.forEach(y => c.fillRect(0, y - RW / 2, W, RW));
+    ROADS_V.forEach(x => c.fillRect(x - RW / 2, 0, RW, H));
+    c.strokeStyle = '#f8fafc'; c.lineWidth = 3; c.setLineDash([16, 14]);
+    ROADS_H.forEach(y => { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); });
+    ROADS_V.forEach(x => { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); });
+    c.setLineDash([]);
+    ROADS_V.forEach(x => ROADS_H.forEach(y => { c.fillStyle = '#4b5563'; c.fillRect(x - RW / 2, y - RW / 2, RW, RW); }));
+  }
+
+  function drawBuilding(c, b, dark, t) {
+    c.fillStyle = 'rgba(0,0,0,.18)'; rr(c, b.x + 5, b.y + 6, b.w, b.h, 8); c.fill();
+    let wall = '#f5efe0', roof = b.roof;
+    if (b.type === 'office') { wall = '#e3f2fd'; roof = '#0b3d91'; }
+    if (b.type === 'hotel') { wall = '#fff7e6'; roof = '#7c3aed'; }
+    if (b.type === 'school') { wall = '#fefce8'; roof = '#dc2626'; }
+    if (b.type === 'shop') { roof = '#0d9488'; }
+    c.fillStyle = wall; rr(c, b.x, b.y, b.w, b.h, 8); c.fill();
+    c.fillStyle = roof; rr(c, b.x + 4, b.y + 4, b.w - 8, b.h - 8, 6); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(b.x + 4, b.y + b.h / 2 - 2, b.w - 8, 4);
+    // jendela (skylight) – gelap kalau padam
+    const lit = dark ? '#334155' : '#ffe680';
+    const cols = Math.max(2, Math.floor(b.w / 34)), rows = Math.max(1, Math.floor(b.h / 60));
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+      const wx = b.x + 12 + i * ((b.w - 24) / cols), wy = b.y + 12 + j * ((b.h - 24) / rows);
+      c.fillStyle = lit; rr(c, wx, wy, Math.min(16, (b.w - 24) / cols - 6), 10, 2); c.fill();
+    }
+    if (b.type === 'hotel') {
+      c.fillStyle = '#ffd400'; c.font = 'bold 26px sans-serif'; c.textAlign = 'center'; c.fillText('HOTEL', b.x + b.w / 2, b.y + b.h / 2 + 10);
+      c.fillStyle = '#1e293b'; rr(c, b.x + b.w - 50, b.y + b.h - 40, 34, 28, 4); c.fill();
+      c.fillStyle = '#ffd400'; c.font = 'bold 18px sans-serif'; c.fillText('⚡', b.x + b.w - 33, b.y + b.h - 19);
+    }
+    if (b.type === 'office') {
+      c.fillStyle = '#ffd400'; c.beginPath(); c.arc(b.x + b.w / 2, b.y + b.h / 2, 20, 0, 7); c.fill();
+      c.fillStyle = '#0b3d91'; c.font = 'bold 24px sans-serif'; c.textAlign = 'center'; c.fillText('⚡', b.x + b.w / 2, b.y + b.h / 2 + 9);
+    }
+    // pintu
+    c.fillStyle = '#7c4a1e'; const d = b.door;
+    if (d.side === 'n' || d.side === 's') c.fillRect(d.x - 7, d.side === 'n' ? b.y - 2 : b.y + b.h - 4, 14, 6);
+    else c.fillRect(d.side === 'w' ? b.x - 2 : b.x + b.w - 4, d.y - 7, 6, 14);
+    if (b.type !== 'house') {
+      c.font = 'bold 12px sans-serif'; c.textAlign = 'center';
+      const tw = c.measureText(b.name).width + 10;
+      c.fillStyle = 'rgba(15,23,42,.8)'; rr(c, b.x + b.w / 2 - tw / 2, b.y - 8, tw, 17, 6); c.fill();
+      c.fillStyle = '#fff'; c.fillText(b.name, b.x + b.w / 2, b.y + 5);
+    }
+  }
+
+  function drawLines(c) {
+    c.strokeStyle = 'rgba(20,20,20,.75)'; c.lineWidth = 1.4;
+    for (let i = 1; i < P.length; i++) {
+      const a = P[i - 1], b = P[i]; if (a.line !== b.line) continue;
+      for (const off of [-6, 0, 6]) {
+        c.beginPath(); c.moveTo(a.x + off * 0, a.y + off); c.quadraticCurveTo((a.x + b.x) / 2, (a.y + b.y) / 2 + off + 7, b.x, b.y + off); c.stroke();
+      }
+    }
+  }
+  function drawPole(c, p, t, faultSpark) {
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(p.x + 4, p.y + 5, 7, 4, 0, 0, 7); c.fill();
+    c.fillStyle = '#6b7280'; c.fillRect(p.x - 2, p.y - 10, 4, 20);
+    c.fillStyle = '#9ca3af'; c.beginPath(); c.arc(p.x, p.y, 5, 0, 7); c.fill();
+    c.strokeStyle = '#374151'; c.lineWidth = 3; c.beginPath(); c.moveTo(p.x - 10, p.y); c.lineTo(p.x + 10, p.y); c.stroke();
+    if (p.trafo) {
+      c.fillStyle = '#94a3b8'; rr(c, p.x - 13, p.y + 6, 26, 18, 3); c.fill();
+      c.strokeStyle = '#475569'; c.lineWidth = 1.5; c.stroke();
+      c.fillStyle = '#facc15'; c.font = 'bold 13px sans-serif'; c.textAlign = 'center'; c.fillText('⚡', p.x, p.y + 20);
+    }
+    if (faultSpark && Math.sin(t * 18) > 0.2) {
+      c.strokeStyle = '#fde047'; c.lineWidth = 2;
+      for (let k = 0; k < 5; k++) { const a = Math.random() * 6.28; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x + Math.cos(a) * 14, p.y + Math.sin(a) * 14); c.stroke(); }
+    }
+  }
+  function drawTree(c, tr) {
+    c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.arc(tr.x + 4, tr.y + 5, tr.r, 0, 7); c.fill();
+    c.fillStyle = '#2f855a'; c.beginPath(); c.arc(tr.x, tr.y, tr.r, 0, 7); c.fill();
+    c.fillStyle = '#38a169'; c.beginPath(); c.arc(tr.x - tr.r * .3, tr.y - tr.r * .3, tr.r * .6, 0, 7); c.fill();
+  }
+  function drawNpc(c, n, t) {
+    const bob = Math.sin(t * 3 + n.x) * 1.5;
+    c.fillStyle = 'rgba(0,0,0,.2)'; c.beginPath(); c.ellipse(n.x + 2, n.y + 9, 8, 4, 0, 0, 7); c.fill();
+    c.font = '20px sans-serif'; c.textAlign = 'center'; c.fillText(n.emo, n.x, n.y + 7 + bob);
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(n.x + 11, n.y - 12 + bob, 7, 0, 7); c.fill();
+    c.fillStyle = '#0b3d91'; c.font = 'bold 10px sans-serif'; c.fillText('…', n.x + 11, n.y - 10 + bob);
+  }
+
+  return { W, H, RW, ROADS_V, ROADS_H, B, P, T, NPCS, hotel, office: B[0], collides, drawGround, drawBuilding, drawLines, drawPole, drawTree, drawNpc, rr };
+})();
+
+</script>
+<script>
+'use strict';
+/* Pembuat misi + mini-game (langkah-langkah pendek). */
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const fmtRp = n => 'Rp' + Math.round(n).toLocaleString('id-ID');
+const PM_ICON = '<span class="pm-ico"></span>';
+const PM_TIPS = [
+  'Pelanggan bisa <b>lapor gangguan</b> listrik lewat aplikasi <b>PLN Mobile</b>.',
+  'Mau <b>pasang baru</b> atau <b>tambah daya</b>? Permohonannya bisa diajukan lewat <b>PLN Mobile</b>.',
+  '<b>Beli token</b> listrik prabayar bisa langsung dari aplikasi <b>PLN Mobile</b>.',
+  '<b>Cek tagihan</b> listrik pascabayar bisa lewat <b>PLN Mobile</b>.',
+  'Ajak pelanggan pakai <b>PLN Mobile</b> supaya laporan &amp; permohonan lebih mudah dipantau.'
+];
+const pmTip = () => `<div class="tipbox">${PM_ICON}<div><b>Tips PLN Mobile:</b> ${pick(PM_TIPS)}</div></div>`;
+const npc = (emo, name, text) => `<div class="npc"><div class="ava">${emo}</div><div class="bubble"><b>${name}</b><br>${text}</div></div>`;
+const pmCard = (title, lines) => `<div class="pm-head">${'<span class="pm-ico lg" style="color:#ffd400"></span>'}<div><div style="font-size:11px;opacity:.85">Notifikasi · PLN Mobile (simulasi)</div><b>${title}</b><div style="font-size:12px;opacity:.9">${lines}</div></div></div>`;
+
+const MTYPES = {
+  teknik: { title: 'Teknik – Cari Gangguan', icon: '⚡', pts: 220, money: 150000, time: 160, color: '#ef4444' },
+  pasang: { title: 'Frontline – Pasang Baru', icon: '🏠', pts: 160, money: 120000, time: 130, color: '#0ea5e9' },
+  tambah: { title: 'Frontline – Tambah Daya', icon: '🔌', pts: 170, money: 130000, time: 130, color: '#8b5cf6' },
+  catat: { title: 'Catat Meter', icon: '📋', pts: 190, money: 110000, time: 190, color: '#16a34a' },
+  hotel: { title: 'Cek Pelanggan Besar (Hotel)', icon: '🏨', pts: 240, money: 200000, time: 140, color: '#f59e0b' }
+};
+const APPL = [['Lampu LED 6 buah', 60], ['TV LED', 80], ['Kulkas', 120], ['Kipas angin', 45], ['Rice cooker', 350], ['Pompa air', 250],
+  ['Setrika', 350], ['Mesin cuci', 300], ['AC ½ PK', 400], ['Dispenser (pemanas)', 300], ['Microwave', 600], ['Komputer', 150], ['Charger HP 3 buah', 30], ['AC 1 PK', 800], ['Water heater', 900]];
+const DAYA_AMP = { 450: 2, 900: 4, 1300: 6, 2200: 10, 3500: 16, 4400: 20 };
+
+function applianceSet(minT, maxT) {
+  for (let tries = 0; tries < 200; tries++) {
+    const list = []; let tot = 0;
+    for (const a of shuffle(APPL)) { if (tot + a[1] <= maxT && list.length < 7) { list.push(a); tot += a[1]; } if (tot >= minT && Math.random() < 0.35) break; }
+    if (tot >= minT && tot <= maxT) return { list, tot };
+  }
+  return { list: [['Lampu LED 6 buah', 60], ['TV LED', 80]], tot: 140 };
+}
+const smallestDaya = (tot, opts) => opts.find(d => d >= tot);
+function applTable(list, tot) {
+  return `<div class="info"><table>${list.map(a => `<tr><td>${a[0]}</td><td>${a[1]} W</td></tr>`).join('')}<tr><td><b>Total beban nyala bersamaan</b></td><td>${tot} W</td></tr></table></div>`;
+}
+
+/* ---------------- Pembuat misi ---------------- */
+const Missions = {
+  generate(type) {
+    const T = MTYPES[type]; const m = Object.assign({ type, uid: Date.now() + Math.random() }, T);
+    const houses = World.B.filter(b => b.type === 'house');
+    if (type === 'teknik') {
+      const tr = pick(World.P.filter(p => p.trafo));
+      const cands = World.P.filter(p => p !== tr && p.line === tr.line).sort((a, b) => Math.hypot(a.x - tr.x, a.y - tr.y) - Math.hypot(b.x - tr.x, b.y - tr.y)).slice(0, 2).concat([tr]);
+      const faulty = pick(cands);
+      const fault = pick([
+        { name: 'Fuse cut-out putus di trafo', tool: 'Stik isolasi (hot stick) + fuse link baru', alt: ['Obeng kecil', 'Palu', 'Tang potong biasa'] },
+        { name: 'Konektor kabel terbakar', tool: 'Konektor baru + tang press', alt: ['Lakban hitam saja', 'Gergaji kayu', 'Kunci roda motor'] },
+        { name: 'Ranting pohon menyentuh jaringan', tool: 'Gergaji galah berisolasi', alt: ['Tangga besi + tangan kosong', 'Golok biasa', 'Ketapel'] }
+      ]);
+      const near = World.B.filter(b => b.type === 'house' || b.type === 'shop').sort((a, b) => Math.hypot(a.x + a.w / 2 - faulty.x, a.y + a.h / 2 - faulty.y) - Math.hypot(b.x + b.w / 2 - faulty.x, b.y + b.h / 2 - faulty.y))[0];
+      Object.assign(m, { via: 'PLN Mobile', center: { x: tr.x, y: tr.y }, radius: 240, cands, faulty, fault, nearName: near.name, checked: [],
+        desc: `Laporan padam masuk via PLN Mobile di sekitar ${tr.name}. Cari titik gangguan lalu perbaiki.` });
+    } else if (type === 'pasang') {
+      const h = pick(houses);
+      Object.assign(m, { via: 'PLN Mobile', target: h, cust: h.owner, reg: 'PB-' + rint(100000, 999999),
+        desc: `Permohonan pasang baru dari ${h.owner} masuk lewat PLN Mobile. Survei & pasang kWh meter.` });
+    } else if (type === 'tambah') {
+      const h = pick(World.B.filter(b => b.type === 'house' || b.type === 'shop'));
+      Object.assign(m, { via: 'PLN Mobile', target: h, cust: h.owner || ('Pemilik ' + h.name), reg: 'TD-' + rint(100000, 999999),
+        desc: `Permohonan tambah daya dari ${h.owner || h.name} via PLN Mobile. Cek MCB, instalasi, tentukan daya baru.` });
+    } else if (type === 'catat') {
+      const start = World.office.door; let pool = shuffle(houses).slice(0, 3);
+      const route = []; let cur = start;
+      while (pool.length) { pool.sort((a, b) => Math.hypot(a.door.x - cur.x, a.door.y - cur.y) - Math.hypot(b.door.x - cur.x, b.door.y - cur.y)); const n = pool.shift(); route.push(n); cur = n.door; }
+      Object.assign(m, { via: 'Posko', route, idx: 0, sus: rint(0, 2), desc: `Catat stand meter 3 rumah sesuai urutan dan waspadai meter mencurigakan.` });
+    } else if (type === 'hotel') {
+      Object.assign(m, { via: 'Posko', target: World.hotel, desc: `Inspeksi panel listrik ${World.hotel.name}: cek beban & faktor daya, beri rekomendasi.` });
+    }
+    return m;
+  }
+};
+
+/* ---------------- Runner mini-game ---------------- */
+const MG = {
+  run(title, steps, ctxBase, onDone) {
+    const el = document.getElementById('mg'), body = document.getElementById('mgBody');
+    el.classList.remove('hidden'); document.getElementById('mgTitle').textContent = title;
+    let i = 0;
+    const ctx = Object.assign(ctxBase, {
+      next() { Sfx.click(); i++; if (i >= steps.length) { el.classList.add('hidden'); onDone(); } else render(); },
+      penalty(p, why) { ctxBase.pen.push([p, why]); Sfx.bad(); const c = el.querySelector('.mg-card'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); },
+      nextBtn(label = 'Lanjut ▶') { const b = document.createElement('button'); b.className = 'nextb'; b.textContent = label; b.onclick = () => ctx.next(); return b; }
+    });
+    function render() { document.getElementById('mgStep').textContent = `Langkah ${i + 1}/${steps.length}`; body.innerHTML = ''; body.scrollTop = 0; steps[i](body, ctx); }
+    render();
+  }
+};
+
+/* Langkah pilihan ganda generik */
+function choiceStep({ html = '', q, opts, correct, explain, pen = 20, why = 'Jawaban kurang tepat' }) {
+  return (body, ctx) => {
+    body.innerHTML = html + `<p class="q">${q}</p>`;
+    const wrap = document.createElement('div'); wrap.className = 'opts';
+    let done = false;
+    opts.forEach((o, k) => {
+      const b = document.createElement('button'); b.className = 'opt'; b.innerHTML = o;
+      b.onclick = () => {
+        if (done) return; done = true;
+        wrap.children[correct].classList.add('right');
+        if (k === correct) Sfx.ok(); else { b.classList.add('wrong'); ctx.penalty(pen, why); }
+        const ex = document.createElement('div'); ex.className = 'explain';
+        ex.innerHTML = (k === correct ? '✅ <b>Benar!</b> ' : `❌ <b>Kurang tepat (−${pen}).</b> `) + explain;
+        body.appendChild(ex); body.appendChild(ctx.nextBtn()); ex.scrollIntoView({ block: 'nearest' });
+      };
+      wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+  };
+}
+function shuffledChoice(cfg) { // cfg.opts[0] = jawaban benar
+  const order = shuffle(cfg.opts.map((o, i) => i));
+  return choiceStep(Object.assign({}, cfg, { opts: order.map(i => cfg.opts[i]), correct: order.indexOf(0) }));
+}
+function infoStep(html, label) { return (body, ctx) => { body.innerHTML = html; body.appendChild(ctx.nextBtn(label)); }; }
+
+/* ---------------- Langkah per jenis misi ---------------- */
+const Steps = {
+  teknikInspect(m, pole) { // dipanggil saat memeriksa kandidat
+    return pole === m.faulty;
+  },
+  teknik(m) {
+    const f = m.fault;
+    return [
+      infoStep(npc('👷', 'Hasil inspeksi', `Ketemu! <b>${f.name}</b> di ${m.faulty.name}. Ratusan pelanggan padam. Saatnya perbaikan — utamakan K3!`) +
+        `<div class="info">Laporan awal masuk dari pelanggan via <b>PLN Mobile</b>, jadi lokasi padam cepat terpetakan.</div>`, 'Mulai perbaikan ▶'),
+      (body, ctx) => { // K3
+        let apd = false, off = false;
+        body.innerHTML = npc('🧔', 'Mandor', 'Ingat SOP K3: <b>pakai APD</b> dulu, lalu <b>padamkan jaringan &amp; pasang grounding</b> sebelum menyentuh apa pun.') + '<div class="opts" id="k3"></div><div id="k3s"></div>';
+        const box = body.querySelector('#k3');
+        const mk = (txt, fn) => { const b = document.createElement('button'); b.className = 'opt'; b.innerHTML = txt; b.onclick = () => fn(b); box.appendChild(b); return b; };
+        mk('🦺 Pakai APD (helm, sarung tangan isolasi, sepatu, body harness)', b => { if (apd) return; apd = true; b.classList.add('done'); b.innerHTML += ' ✔'; Sfx.ok(); });
+        mk('⛔ Padamkan jaringan &amp; pasang grounding', b => {
+          if (off) return; if (!apd) { ctx.penalty(15, 'Padamkan jaringan sebelum pakai APD'); }
+          off = true; b.classList.add('done'); b.innerHTML += ' ✔'; Sfx.zap();
+        });
+        mk('🔧 Langsung mulai perbaikan', () => {
+          if (!apd || !off) {
+            if (!apd) ctx.penalty(60, 'Bekerja tanpa APD (melanggar K3)');
+            if (!off) ctx.penalty(60, 'Bekerja di jaringan bertegangan (melanggar K3)');
+            ctx.k3fail = true;
+            body.querySelector('#k3s').innerHTML = '<div class="explain">⚠️ <b>BAHAYA!</b> Melewati langkah keselamatan bisa berakibat fatal. Poin dikurangi.</div>';
+            box.querySelectorAll('button').forEach(b => b.disabled = true);
+            setTimeout(() => ctx.next(), 1600);
+          } else ctx.next();
+        });
+      },
+      shuffledChoice({ html: `<div class="info">Kerusakan: <b>${f.name}</b></div>`, q: 'Alat yang tepat untuk perbaikan?', opts: [f.tool].concat(f.alt),
+        explain: `Gunakan <b>${f.tool}</b> — alat berisolasi sesuai jenis gangguan.`, pen: 25, why: 'Salah pilih alat' }),
+      (body, ctx) => { // sambung kabel berurutan
+        const order = [['N', 'Netral', '#2563eb'], ['L1', 'Fasa R', '#8b5a2b'], ['L2', 'Fasa S', '#111827'], ['L3', 'Fasa T', '#6b7280']];
+        let pos = 0;
+        body.innerHTML = '<p class="q">Sambungkan kembali kabel sesuai urutan aman:</p><div class="info">Netral (biru) dulu, lalu fasa R (coklat), S (hitam), T (abu-abu).</div><div class="term">' +
+          order.map(o => `<span data-k="${o[0]}">${o[0]}</span>`).join('') + '</div><div class="wires"></div>';
+        const wires = body.querySelector('.wires'), slots = body.querySelectorAll('.term span');
+        shuffle(order).forEach(o => {
+          const b = document.createElement('button'); b.className = 'wire'; b.style.background = o[2]; b.textContent = `${o[0]} · ${o[1]}`;
+          b.onclick = () => {
+            if (b.disabled) return;
+            if (o[0] === order[pos][0]) { slots[pos].classList.add('fill'); slots[pos].style.background = o[2]; pos++; b.disabled = true; b.style.opacity = .35; Sfx.ok();
+              if (pos === order.length) { body.appendChild(Object.assign(document.createElement('div'), { className: 'explain', innerHTML: '✅ Semua kabel tersambung rapi.' })); body.appendChild(ctx.nextBtn()); }
+            } else { ctx.penalty(10, 'Urutan sambung kabel salah'); pos = 0; slots.forEach(s => { s.classList.remove('fill'); s.style.background = ''; }); wires.querySelectorAll('button').forEach(w => { w.disabled = false; w.style.opacity = 1; }); }
+          };
+          wires.appendChild(b);
+        });
+      },
+      (body, ctx) => {
+        body.innerHTML = npc('🧔', 'Mandor', 'Perbaikan selesai. Lepas grounding, pastikan semua personel aman, lalu normalkan jaringan.');
+        const b = document.createElement('button'); b.className = 'nextb'; b.textContent = '💡 Lepas grounding & normalkan';
+        b.onclick = () => { Sfx.win(); body.innerHTML = '<div class="info" style="text-align:center;font-size:40px">💡💡💡</div>' +
+          npc('👨', 'Warga', 'Alhamdulillah, nyala lagi! Tadi saya lapor lewat PLN Mobile, cepat juga petugasnya datang.') + pmTip(); body.appendChild(ctx.nextBtn('Selesai ✔')); };
+        body.appendChild(b);
+      }
+    ];
+  },
+
+  pasang(m) {
+    const issue = pick([null, null, 'slo', 'ktp']);
+    const wrongName = pick(['Ahmad Fauzi', 'Rini Susanti', 'Hendra Wijaya']);
+    const target = pick([450, 900, 1300, 2200]);
+    const ranges = { 450: [200, 440], 900: [460, 880], 1300: [920, 1280], 2200: [1320, 2150] };
+    const ap = applianceSet(...ranges[target]);
+    const ans = smallestDaya(ap.tot, [450, 900, 1300, 2200]);
+    return [
+      infoStep(pmCard('Permohonan Pasang Baru', `No. registrasi ${m.reg} · a.n. ${m.cust}`) +
+        npc('🙂', m.cust, 'Selamat datang, Pak Petugas! Saya ajukan <b>pasang baru lewat aplikasi PLN Mobile</b>, praktis dari HP. Ini rumah yang mau dipasang listrik.'), 'Cek dokumen ▶'),
+      shuffledChoice({
+        html: '<p>Periksa dokumen pemohon:</p><div class="docs">' +
+          `<div class="doc ${issue === 'ktp' ? 'bad' : ''}"><b>🪪 KTP</b>Nama: ${issue === 'ktp' ? wrongName : m.cust}</div>` +
+          `<div class="doc ${issue === 'slo' ? 'bad' : ''}"><b>📄 SLO</b>${issue === 'slo' ? '— belum ada —' : 'No. ' + rint(1000, 9999) + '/SLO · Berlaku'}</div>` +
+          `<div class="doc"><b>📱 Bukti PLN Mobile</b>Reg. ${m.reg}</div><div class="doc"><b>🏠 Alamat</b>Sesuai lokasi survei</div></div>`,
+        q: 'Bagaimana kondisi dokumennya?',
+        opts: issue === null ? ['Lengkap &amp; sesuai, lanjut pemasangan', 'SLO belum ada, tunda dulu', 'Nama di KTP tidak sesuai']
+          : issue === 'slo' ? ['SLO (Sertifikat Laik Operasi) belum ada — minta pemohon melengkapi dulu', 'Lengkap &amp; sesuai, lanjut pemasangan', 'Nama di KTP tidak sesuai']
+          : ['Nama di KTP tidak sesuai pemohon — minta verifikasi data', 'Lengkap &amp; sesuai, lanjut pemasangan', 'SLO belum ada, tunda dulu'],
+        explain: issue === null ? 'Semua dokumen lengkap.' : 'Pemohon segera melengkapi dokumen, pemasangan dilanjutkan (simulasi).', why: 'Salah cek dokumen'
+      }),
+      choiceStep({
+        html: npc('🙂', m.cust, 'Ini daftar alat listrik yang akan dipakai di rumah:') + applTable(ap.list, ap.tot) +
+          '<div class="info">Aturan game: pilih <b>daya terkecil</b> yang ≥ total beban (anggap 1 W ≈ 1 VA).</div>',
+        q: 'Daya yang tepat untuk pelanggan ini?', opts: ['450 VA', '900 VA', '1.300 VA', '2.200 VA'], correct: [450, 900, 1300, 2200].indexOf(ans),
+        explain: `Total ${ap.tot} W → daya terkecil yang cukup adalah <b>${ans.toLocaleString('id-ID')} VA</b> (MCB ${DAYA_AMP[ans]} A).`, why: 'Salah pilih daya'
+      }),
+      (body, ctx) => dragInstall(body, ctx, ans),
+      infoStep('<div class="info" style="text-align:center;font-size:40px">🏠💡</div>' +
+        npc('😄', m.cust, 'Terima kasih! Nanti <b>beli token</b> dan cek riwayat pemakaian bisa lewat <b>PLN Mobile</b> juga ya?') +
+        npc('🦸', 'Kamu', 'Betul, Bu/Pak. Kalau ada gangguan, laporkan juga lewat PLN Mobile.') + pmTip(), 'Selesai ✔')
+    ];
+  },
+
+  tambah(m) {
+    const cur = pick([450, 900, 1300]);
+    const opts = [900, 1300, 2200, 3500, 4400].filter(d => d > cur).slice(0, 4);
+    const lo = cur + 50, hi = opts[opts.length - 1] - 100;
+    let ap = applianceSet(lo, Math.min(hi, 3400)); if (ap.tot <= cur) ap = { list: ap.list.concat([['AC 1 PK', 800]]), tot: ap.tot + 800 };
+    const ans = smallestDaya(ap.tot, opts) || opts[opts.length - 1];
+    const bad = Math.random() < 0.4;
+    return [
+      infoStep(pmCard('Permohonan Tambah Daya', `No. ${m.reg} · a.n. ${m.cust}`) +
+        npc('😟', m.cust, 'MCB sering "njeglek" kalau AC dan rice cooker nyala bareng. Makanya saya ajukan <b>tambah daya lewat PLN Mobile</b>.'), 'Cek MCB ▶'),
+      choiceStep({
+        html: `<div class="meterbox"><svg width="120" height="150" viewBox="0 0 120 150"><rect x="20" y="5" width="80" height="140" rx="8" fill="#f8fafc" stroke="#334155" stroke-width="3"/><rect x="45" y="30" width="30" height="45" rx="4" fill="#1e293b"/><rect x="50" y="35" width="20" height="18" rx="2" fill="#22c55e"/><text x="60" y="105" font-size="22" font-weight="bold" text-anchor="middle" fill="#0f172a">C${DAYA_AMP[cur]}A</text><text x="60" y="128" font-size="11" text-anchor="middle" fill="#475569">230V~</text></svg></div>` +
+          '<div class="info">Rumus: Daya ≈ 220 V × arus MCB (dibulatkan ke golongan daya).</div>',
+        q: 'Berapa daya terpasang saat ini?', opts: ['450 VA', '900 VA', '1.300 VA', '2.200 VA'], correct: [450, 900, 1300, 2200].indexOf(cur),
+        explain: `MCB ${DAYA_AMP[cur]} A → ${cur.toLocaleString('id-ID')} VA.`, why: 'Salah baca MCB'
+      }),
+      shuffledChoice({
+        html: '<p>Cek instalasi rumah:</p><div class="info"><table>' + (bad
+          ? '<tr><td>Ukuran kabel</td><td>1,5 mm²</td></tr><tr><td>Stop kontak dapur</td><td>⚠️ isolasi meleleh</td></tr><tr><td>Sambungan</td><td>⚠️ dililit lakban</td></tr>'
+          : '<tr><td>Ukuran kabel</td><td>2,5 mm²</td></tr><tr><td>Stop kontak</td><td>✔ rapi</td></tr><tr><td>Grounding</td><td>✔ ada</td></tr>') + '</table></div>',
+        q: 'Kesimpulan instalasi?',
+        opts: bad ? ['Perlu perbaikan instalasi oleh instalatir &amp; SLO baru sebelum tambah daya', 'Instalasi layak, langsung naikkan daya'] : ['Instalasi layak untuk tambah daya', 'Wajib bongkar semua instalasi'],
+        explain: bad ? 'Instalasi tidak aman bisa memicu kebakaran. Pelanggan memperbaiki dulu, lalu dilanjutkan (simulasi).' : 'Instalasi dalam kondisi baik.', pen: 25, why: 'Salah menilai instalasi'
+      }),
+      choiceStep({
+        html: npc('😟', m.cust, 'Ini alat listrik yang biasa nyala bersamaan:') + applTable(ap.list, ap.tot) + '<div class="info">Pilih <b>daya baru terkecil</b> yang ≥ total beban.</div>',
+        q: 'Daya baru yang direkomendasikan?', opts: opts.map(d => d.toLocaleString('id-ID') + ' VA'), correct: opts.indexOf(ans),
+        explain: `Total ${ap.tot} W → <b>${ans.toLocaleString('id-ID')} VA</b> (MCB ${DAYA_AMP[ans]} A).`, why: 'Salah pilih daya baru'
+      }),
+      (body, ctx) => {
+        body.innerHTML = '<p class="q">Eksekusi: ganti MCB &amp; atur ulang meter.</p>';
+        const b = document.createElement('button'); b.className = 'nextb'; b.textContent = `🔧 Pasang MCB ${DAYA_AMP[ans]} A`;
+        b.onclick = () => { Sfx.win(); body.innerHTML = '<div class="info" style="text-align:center;font-size:40px">🔌✅</div>' +
+          npc('😄', m.cust, 'Mantap, sekarang AC dan rice cooker bisa nyala bareng! Status permohonannya juga kelihatan di PLN Mobile.') + pmTip(); body.appendChild(ctx.nextBtn('Selesai ✔')); };
+        body.appendChild(b);
+      }
+    ];
+  },
+
+  catat(m, i) {
+    const h = m.route[i], sus = i === m.sus;
+    const last = rint(1200, 8800); const use = sus ? 0 : rint(80, 260); const now = last + use;
+    const s = n => String(n).padStart(6, '0');
+    const dis = new Set(); while (dis.size < 3) { const d = pick([now + 100, now - 100, Number(String(now).split('').reverse().join('')), now + 10, now - 9, last]); if (d !== now && d > 0) dis.add(d); }
+    return [
+      shuffledChoice({
+        html: `<p><b>${h.name}</b> (${i + 1}/3) · Stand bulan lalu: <b>${s(last)}</b></p><div class="lcd">${s(now)}</div><div style="text-align:center;font-size:12px;color:#64748b">kWh meter · ID ${rint(51000000000, 51999999999)}</div>`,
+        q: 'Masukkan stand meter yang benar:', opts: [s(now)].concat([...dis].map(s)),
+        explain: `Stand saat ini <b>${s(now)}</b>, pemakaian ${use} kWh.`, pen: 15, why: 'Salah catat stand'
+      }),
+      shuffledChoice({
+        html: `<div class="meterbox"><svg width="200" height="150" viewBox="0 0 200 150"><rect x="50" y="10" width="100" height="120" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="3"/><rect x="62" y="25" width="76" height="26" rx="3" fill="#9fbf8f"/><text x="100" y="44" font-family="monospace" font-size="15" text-anchor="middle">${s(now)}</text>` +
+          `<circle cx="100" cy="120" r="8" fill="${sus ? '#ef4444' : '#22c55e'}"/>${sus ? '<line x1="93" y1="113" x2="107" y2="127" stroke="#fff" stroke-width="3"/>' : ''}` +
+          `<line x1="80" y1="130" x2="80" y2="150" stroke="#111" stroke-width="4"/><line x1="120" y1="130" x2="120" y2="150" stroke="#111" stroke-width="4"/>` +
+          (sus ? '<path d="M80 140 C 40 140, 40 60, 60 60" stroke="#dc2626" stroke-width="3" fill="none" stroke-dasharray="4 3"/><text x="10" y="100" font-size="10" fill="#dc2626">kabel?</text>' : '') +
+          `</svg></div><div class="info"><table><tr><td>Segel</td><td>${sus ? '⚠️ putus' : '✔ utuh'}</td></tr><tr><td>Pemakaian bulan ini</td><td>${use} kWh</td></tr><tr><td>Lampu rumah</td><td>menyala</td></tr></table></div>`,
+        q: 'Kondisi meter ini?', opts: sus ? ['Mencurigakan — laporkan ke tim P2TL', 'Normal'] : ['Normal', 'Mencurigakan — laporkan ke tim P2TL'],
+        explain: sus ? 'Segel putus, ada kabel tambahan, dan pemakaian 0 kWh padahal lampu menyala → indikasi pencurian listrik. Laporkan, jangan menindak sendiri.' : 'Segel utuh dan pemakaian wajar.',
+        pen: 30, why: 'Salah menilai kondisi meter'
+      })
+    ];
+  },
+
+  hotel(m) {
+    const pf = (rint(72, 82) / 100).toFixed(2), load = rint(62, 95);
+    const ph = shuffle(['R', 'S', 'T']); const amps = { [ph[0]]: rint(200, 230), [ph[1]]: rint(140, 160), [ph[2]]: rint(85, 105) };
+    const over = load >= 85;
+    const panel = `<div class="info"><table><tr><td>Daya tersambung</td><td>345 kVA</td></tr><tr><td>Tegangan R / S / T</td><td>${rint(378, 382)} / ${rint(377, 382)} / ${rint(376, 381)} V</td></tr>` +
+      `<tr><td>Arus R / S / T</td><td>${amps.R} / ${amps.S} / ${amps.T} A</td></tr><tr><td>Faktor daya (cos φ)</td><td>${pf.replace('.', ',')}</td></tr><tr><td>Beban puncak</td><td>${load}% kapasitas</td></tr></table></div>`;
+    return [
+      infoStep(npc('👨‍🔧', 'Teknisi Hotel', 'Pak, tagihan kami ada biaya <b>kelebihan kVArh</b>, dan MCCB kadang trip waktu jam sibuk. Mohon dicek panelnya.') + panel, 'Analisis ▶'),
+      shuffledChoice({ html: panel, q: `cos φ = ${pf.replace('.', ',')}. Rekomendasinya?`,
+        opts: ['Di bawah 0,85 → pasang/servis kapasitor bank untuk memperbaiki faktor daya', 'Normal, tidak perlu tindakan', 'Turunkan tegangan trafo'],
+        explain: 'Faktor daya rendah memicu biaya kelebihan daya reaktif (kVArh). Kapasitor bank membantu menaikkannya.', pen: 25, why: 'Salah analisis faktor daya' }),
+      shuffledChoice({ html: panel, q: `Arus fasa ${ph[0]} ${amps[ph[0]]} A, fasa ${ph[2]} hanya ${amps[ph[2]]} A. Artinya?`,
+        opts: ['Beban tidak seimbang → atur ulang pembagian beban antar fasa', 'Seimbang, aman', 'Kabel netral harus dilepas'],
+        explain: 'Beban tidak seimbang bikin satu fasa panas &amp; MCCB trip. Bagi ulang beban antar fasa.', pen: 25, why: 'Salah analisis beban fasa' }),
+      shuffledChoice({ html: panel, q: `Beban puncak ${load}% dari kapasitas. Saran ke hotel?`,
+        opts: over ? ['Mendekati batas → sarankan tambah daya (bisa diajukan lewat PLN Mobile)', 'Kapasitas masih longgar, tidak perlu apa-apa']
+          : ['Kapasitas masih cukup → lakukan perawatan rutin', 'Wajib tambah daya sekarang juga'],
+        explain: over ? 'Beban ≥85% berisiko trip saat musim ramai. Permohonan tambah daya bisa diajukan lewat PLN Mobile.' : 'Masih ada cadangan kapasitas, cukup perawatan rutin.', pen: 25, why: 'Rekomendasi kapasitas kurang tepat' }),
+      infoStep(npc('👨‍🔧', 'Teknisi Hotel', 'Terima kasih rekomendasinya, Pak! Laporan sudah kami terima.') + pmTip(), 'Kirim laporan ✔')
+    ];
+  }
+};
+
+/* Drag & drop pemasangan kWh meter (juga bisa tap-pilih lalu tap-slot) */
+function dragInstall(body, ctx, daya) {
+  const parts = [['sr', '🧵 Kabel SR'], ['kwh', '📟 kWh Meter'], ['mcb', `🔘 MCB ${DAYA_AMP[daya]} A`], ['segel', '🔒 Segel']];
+  const slots = [['sr', '① Sambungan dari tiang'], ['kwh', '② Alat ukur energi'], ['mcb', '③ Pembatas daya'], ['segel', '④ Pengaman tera']];
+  body.innerHTML = '<p class="q">Pasang APP: seret komponen ke tempatnya (atau tap komponen lalu tap slot).</p><div class="board">' +
+    slots.map(s => `<div class="slot" data-k="${s[0]}">${s[1]}</div>`).join('') + '</div><div class="parts"></div>';
+  const pw = body.querySelector('.parts'); let sel = null, placed = 0;
+  const tryPlace = (p, slot) => {
+    if (!slot || slot.classList.contains('ok')) return false;
+    if (slot.dataset.k === p.dataset.k) {
+      slot.classList.add('ok'); slot.innerHTML = p.textContent + '<br>✔'; p.classList.add('used'); Sfx.ok(); placed++;
+      if (placed === parts.length) { body.appendChild(Object.assign(document.createElement('div'), { className: 'explain', innerHTML: '✅ kWh meter terpasang &amp; tersegel.' })); body.appendChild(ctx.nextBtn()); }
+      return true;
+    }
+    ctx.penalty(10, 'Komponen salah tempat'); return false;
+  };
+  shuffle(parts).forEach(([k, label]) => {
+    const p = document.createElement('div'); p.className = 'part'; p.dataset.k = k; p.textContent = label; pw.appendChild(p);
+    let ghost = null, sx = 0, sy = 0, moved = false;
+    p.addEventListener('pointerdown', e => { if (p.classList.contains('used')) return; sx = e.clientX; sy = e.clientY; moved = false; p.setPointerCapture(e.pointerId); });
+    p.addEventListener('pointermove', e => {
+      if (!p.hasPointerCapture(e.pointerId)) return;
+      if (!moved && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) { moved = true; ghost = p.cloneNode(true); ghost.classList.add('drag-ghost'); document.body.appendChild(ghost); }
+      if (ghost) { ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px';
+        body.querySelectorAll('.slot').forEach(s => s.classList.remove('hover'));
+        const el = document.elementFromPoint(e.clientX, e.clientY); const s = el && el.closest('.slot'); if (s) s.classList.add('hover'); }
+    });
+    p.addEventListener('pointerup', e => {
+      if (ghost) { ghost.remove(); ghost = null; body.querySelectorAll('.slot').forEach(s => s.classList.remove('hover'));
+        const el = document.elementFromPoint(e.clientX, e.clientY); tryPlace(p, el && el.closest('.slot')); }
+      else if (!moved && !p.classList.contains('used')) { body.querySelectorAll('.part').forEach(q => q.classList.remove('sel')); sel = p; p.classList.add('sel'); Sfx.click(); }
+    });
+  });
+  body.querySelectorAll('.slot').forEach(s => s.addEventListener('click', () => { if (sel && tryPlace(sel, s)) sel = null; else if (sel) { sel.classList.remove('sel'); sel = null; } }));
+}
+
+</script>
+<script>
+'use strict';
+/* PLN Hero – Petugas Listrik (Prototype). Loop utama, input, HUD, HP, alur misi, simpan progres. */
+const $ = s => document.querySelector(s);
+const RANKS = [['Petugas Magang', 0], ['Petugas Muda', 300], ['Petugas Terampil', 800], ['Teknisi Senior', 1600], ['Koordinator Lapangan', 2800], ['Supervisor', 4500]];
+const SAVE_KEY = 'plnhero_save_v1';
+const defSave = () => ({ points: 0, money: 0, done: { teknik: 0, pasang: 0, tambah: 0, catat: 0, hotel: 0 }, failed: 0, k3: 0, sound: true, tut: false });
+let save = (() => { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && typeof s.points === 'number') return Object.assign(defSave(), s); } catch (e) {} return defSave(); })();
+const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} };
+const rankIdx = p => RANKS.reduce((r, x, i) => (p >= x[1] ? i : r), 0);
+Sfx.enabled = save.sound;
+
+const cv = $('#cv'), c = cv.getContext('2d');
+let VW = 0, VH = 0, DPR = 1, scale = 1;
+const player = { x: World.office.door.x, y: World.office.door.y - 22, a: Math.PI / 2, v: 0 };
+const cam = { x: 0, y: 0 };
+const input = { jx: 0, jy: 0, keys: {}, joy: null };
+let state = 'start'; // start | play | modal
+let offers = [], active = null, actionTarget = null, lastNpc = null, notifT = 20, t = 0, toastT = 0;
+
+function resize() {
+  const r = $('#app').getBoundingClientRect(); DPR = Math.min(window.devicePixelRatio || 1, 2);
+  VW = r.width; VH = r.height; cv.width = Math.round(VW * DPR); cv.height = Math.round(VH * DPR);
+  scale = Math.max(0.8, Math.min(2.2, VW / 420));
+}
+window.addEventListener('resize', resize); resize();
+
+/* ---------- Input ---------- */
+cv.addEventListener('pointerdown', e => { if (state !== 'play') return; Sfx.init(); const r = cv.getBoundingClientRect(); input.joy = { id: e.pointerId, ox: e.clientX - r.left, oy: e.clientY - r.top, x: e.clientX - r.left, y: e.clientY - r.top }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => { const j = input.joy; if (!j || j.id !== e.pointerId) return; const r = cv.getBoundingClientRect(); j.x = e.clientX - r.left; j.y = e.clientY - r.top; });
+const endJoy = e => { if (input.joy && input.joy.id === e.pointerId) input.joy = null; };
+cv.addEventListener('pointerup', endJoy); cv.addEventListener('pointercancel', endJoy);
+window.addEventListener('keydown', e => {
+  input.keys[e.key.toLowerCase()] = true;
+  if (state === 'play' && (e.key === ' ' || e.key.toLowerCase() === 'e') && !$('#btnAct').classList.contains('hidden')) { e.preventDefault(); $('#btnAct').click(); }
+  if (state === 'play' && e.key.toLowerCase() === 'm') openPhone();
+});
+window.addEventListener('keyup', e => { input.keys[e.key.toLowerCase()] = false; });
+
+/* ---------- UI helpers ---------- */
+function toast(html, ms = 3200) { const el = $('#toast'); el.innerHTML = html; el.classList.remove('hidden'); toastT = ms / 1000; }
+function hud() {
+  const ri = rankIdx(save.points), nx = RANKS[ri + 1];
+  $('#hPts').textContent = save.points.toLocaleString('id-ID');
+  $('#hMoney').textContent = fmtRp(save.money);
+  $('#hRank').textContent = `Lv${ri + 1} · ${RANKS[ri][0]}`;
+  $('#hBar').style.width = nx ? (100 * (save.points - RANKS[ri][1]) / (nx[1] - RANKS[ri][1])) + '%' : '100%';
+}
+function show(id, on) { $(id).classList.toggle('hidden', !on); }
+function fmtTime(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+/* ---------- Misi ---------- */
+function refreshOffers() {
+  const types = shuffle(Object.keys(MTYPES)).slice(0, 3);
+  offers = types.map(tp => Missions.generate(tp));
+}
+function accept(m) {
+  active = { m, timeLeft: m.time, pen: [], phase: m.type === 'teknik' ? 'area' : 'go', k3fail: false };
+  offers = offers.filter(o => o !== m);
+  closePhone(); Sfx.notif();
+  toast(`${m.icon} <b>Misi diterima:</b> ${m.desc}`);
+}
+function cancelActive() { if (!active) return; active = null; save.failed++; persist(); toast('Misi dibatalkan.'); refreshOffers(); updateObjective(); }
+
+function targets() { // daftar titik aktif
+  if (!active) return [];
+  const m = active.m;
+  if (m.type === 'teknik') {
+    if (active.phase === 'area') return [{ x: m.center.x, y: m.center.y, area: m.radius, label: 'Area padam' }];
+    return m.cands.filter(p => !m.checked.includes(p)).map(p => ({ x: p.x, y: p.y + 14, pole: p, label: 'Periksa ' + p.name }));
+  }
+  if (m.type === 'catat') { const h = m.route[m.idx]; return [{ x: h.door.x, y: h.door.y, b: h, label: `Catat meter (${m.idx + 1}/3)` }]; }
+  return [{ x: m.target.door.x, y: m.target.door.y, b: m.target, label: m.type === 'hotel' ? 'Cek panel hotel' : 'Temui pelanggan' }];
+}
+function updateObjective() {
+  show('#objective', !!active);
+  if (!active) return;
+  const m = active.m, tg = targets()[0];
+  let txt = '';
+  if (m.type === 'teknik') txt = active.phase === 'area' ? `Menuju area padam sekitar ${World.P.find(p => p.x === m.center.x && p.y === m.center.y).name}` :
+    `Petunjuk: "Ada bunyi letupan dekat <b>${m.nearName}</b>". Periksa tiang/trafo bertanda ❓`;
+  else if (m.type === 'catat') txt = `Catat meter ${m.route[m.idx].name} (${m.idx + 1}/3)`;
+  else txt = `${m.title.split('–').pop().trim()}: ${m.target.name}`;
+  if (tg && m.type !== 'teknik') txt += ` · ${Math.round(Math.hypot(tg.x - player.x, tg.y - player.y) / 10)} m`;
+  $('#objIcon').textContent = m.icon; $('#objText').innerHTML = txt;
+}
+
+function startMiniGame(tg) {
+  const m = active.m; state = 'modal'; show('#btnAct', false); show('#toast', false); toastT = 0;
+  const ctx = active; // pen[], k3fail
+  if (m.type === 'teknik') {
+    if (tg.pole !== m.faulty) { m.checked.push(tg.pole); Sfx.click(); state = 'play'; toast(`🔍 ${tg.pole.name}: kondisi <b>normal</b>. Cari titik lain sesuai petunjuk.`); return; }
+    MG.run(`${m.icon} ${m.title}`, Steps.teknik(m), ctx, () => finish(true));
+  } else if (m.type === 'catat') {
+    MG.run(`${m.icon} Catat Meter · ${m.route[m.idx].name}`, Steps.catat(m, m.idx), ctx, () => {
+      m.idx++; if (m.idx >= m.route.length) finish(true); else { state = 'play'; toast(`✅ Tercatat. Lanjut ke ${m.route[m.idx].name}.`); }
+    });
+  } else MG.run(`${m.icon} ${m.title}`, Steps[m.type](m), ctx, () => finish(true));
+}
+
+function finish(ok) {
+  const a = active, m = a.m; active = null; state = 'modal';
+  const before = rankIdx(save.points);
+  const penTot = a.pen.reduce((s, p) => s + p[0], 0);
+  let total, money = 0;
+  let html = '';
+  if (ok) {
+    const bonus = Math.round(a.timeLeft);
+    total = Math.max(10, m.pts + bonus - penTot); money = Math.round(m.money * Math.max(0.3, total / (m.pts + bonus)) / 1000) * 1000;
+    save.done[m.type]++; if (a.k3fail) save.k3++;
+    html += `<div class="sum-row"><span>${m.icon} ${m.title}</span><b>+${m.pts}</b></div><div class="sum-row"><span>⏱ Bonus sisa waktu</span><b>+${bonus}</b></div>`;
+    a.pen.forEach(p => html += `<div class="sum-row neg"><span>${p[1]}</span><b>−${p[0]}</b></div>`);
+    html += `<div class="sum-row tot"><span>Total poin</span><b>+${total}</b></div><div class="sum-row tot"><span>Insentif</span><b>${fmtRp(money)}</b></div>`;
+    if (a.k3fail) html += '<div class="explain">⚠️ Catatan K3: kamu melewati langkah keselamatan. Di lapangan nyata, K3 nomor satu!</div>';
+    else if (!a.pen.length) html += '<div class="explain">🌟 Sempurna! Tanpa kesalahan.</div>';
+    $('#sumTitle').textContent = '✅ Misi Selesai!'; Sfx.win();
+  } else {
+    total = -Math.min(30, save.points); save.failed++;
+    html += `<div class="sum-row neg"><span>Waktu habis – ${m.title}</span><b>${total}</b></div><div class="explain">Coba lagi! Pilih rute terdekat dan jangan terlalu lama di jalan.</div>`;
+    $('#sumTitle').textContent = '⌛ Misi Gagal'; Sfx.fail();
+  }
+  save.points = Math.max(0, save.points + total); save.money += money; persist();
+  const after = rankIdx(save.points);
+  if (after > before) { html += `<div class="rankup">🎖️ Naik pangkat: ${RANKS[after][0]}!</div>`; setTimeout(() => Sfx.rank(), 600); }
+  html += pmTip();
+  $('#sumBody').innerHTML = html; show('#sum', true); hud(); refreshOffers(); updateObjective();
+}
+$('#btnSumOk').onclick = () => { Sfx.click(); show('#sum', false); state = 'play'; notifT = 8; };
+
+/* ---------- HP ---------- */
+let phoneTab = 'misi';
+function openPhone() { if (state !== 'play') return; Sfx.click(); state = 'modal'; show('#phone', true); show('#phoneDot', false); renderPhone(); }
+function closePhone() { show('#phone', false); state = 'play'; }
+$('#btnPhone').onclick = openPhone; $('#btnPhoneClose').onclick = () => { Sfx.click(); closePhone(); };
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { Sfx.click(); phoneTab = b.dataset.tab; renderPhone(); });
+function renderPhone() {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === phoneTab));
+  const d = new Date(); $('#phClock').textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  const body = $('#phBody'); body.innerHTML = '';
+  if (phoneTab === 'misi') {
+    if (active) {
+      const m = active.m;
+      body.innerHTML = `<div class="mcard" style="border-color:${m.color}"><h4>${m.icon} Misi aktif: ${m.title}</h4><p>${m.desc}</p><div class="meta"><span>⏱ ${fmtTime(active.timeLeft)}</span><span>⭐ ${m.pts} poin</span></div></div>`;
+      const b = document.createElement('button'); b.className = 'btn warn'; b.textContent = 'Batalkan misi'; b.onclick = () => { cancelActive(); renderPhone(); }; body.appendChild(b);
+      return;
+    }
+    body.insertAdjacentHTML('beforeend', '<p style="margin:2px 0 8px;font-weight:700">📋 Papan Misi – pilih satu:</p>');
+    offers.forEach(m => {
+      const el = document.createElement('div'); el.className = 'mcard'; el.style.borderColor = m.color;
+      el.innerHTML = `<h4>${m.icon} ${m.title}</h4><p>${m.desc}</p><div class="meta">${m.via === 'PLN Mobile' ? `<span class="via"><span class="pm-ico sm"></span> via PLN Mobile</span>` : '<span class="via">📻 dari Posko</span>'}<span>⭐ ${m.pts} poin</span><span>💰 ${fmtRp(m.money)}</span><span>⏱ ${fmtTime(m.time)}</span></div>`;
+      const b = document.createElement('button'); b.textContent = 'Ambil misi'; b.onclick = () => accept(m); el.appendChild(b); body.appendChild(el);
+    });
+  } else if (phoneTab === 'plnm') {
+    body.innerHTML = `<div class="pm-head"><span class="pm-ico lg"></span><div><b style="font-size:16px">PLN Mobile</b><div style="font-size:12px;opacity:.9">Aplikasi layanan pelanggan listrik (simulasi dalam game)</div></div></div>
+      <div class="pm-grid">
+        <div class="pm-tile"><span class="e">⚠️</span><b>Lapor Gangguan</b>Pelanggan bisa melaporkan listrik padam dari HP.</div>
+        <div class="pm-tile"><span class="e">🏠</span><b>Pasang Baru</b>Ajukan sambungan listrik baru.</div>
+        <div class="pm-tile"><span class="e">🔌</span><b>Tambah Daya</b>Ajukan kenaikan daya listrik.</div>
+        <div class="pm-tile"><span class="e">🔋</span><b>Beli Token</b>Beli token listrik prabayar.</div>
+        <div class="pm-tile"><span class="e">🧾</span><b>Cek Tagihan</b>Lihat tagihan listrik pascabayar.</div>
+        <div class="pm-tile"><span class="e">📍</span><b>Pantau Status</b>Lihat perkembangan laporan &amp; permohonan.</div>
+      </div>
+      <div class="note">Di game ini, laporan padam serta permohonan pasang baru &amp; tambah daya dari warga masuk sebagai misi bertanda "via PLN Mobile". Ikon HP ini ikon umum, bukan logo resmi. Untuk layanan sebenarnya, gunakan aplikasi PLN Mobile resmi di toko aplikasi.</div>`;
+  } else {
+    const ri = rankIdx(save.points), nx = RANKS[ri + 1], dn = save.done;
+    body.innerHTML = `<div class="mcard"><h4>🦸 Profil Petugas</h4><p>Pangkat: <b>${RANKS[ri][0]}</b> (Lv${ri + 1})<br>Poin: <b>${save.points}</b>${nx ? ` · ${nx[1] - save.points} lagi ke ${nx[0]}` : ' · pangkat tertinggi!'}<br>Saldo insentif: <b>${fmtRp(save.money)}</b></p></div>
+      <div class="mcard"><h4>📊 Misi selesai</h4><p>⚡ Cari Gangguan: ${dn.teknik}<br>🏠 Pasang Baru: ${dn.pasang}<br>🔌 Tambah Daya: ${dn.tambah}<br>📋 Catat Meter: ${dn.catat}<br>🏨 Pelanggan Besar: ${dn.hotel}<br>⌛ Gagal/batal: ${save.failed} · ⚠️ Pelanggaran K3: ${save.k3}</p></div>
+      <div class="mcard"><h4>🎖️ Jenjang pangkat</h4><p>${RANKS.map((r, i) => (i === ri ? '👉 <b>' : '') + `${r[0]} (${r[1]})` + (i === ri ? '</b>' : '')).join('<br>')}</p></div>`;
+    const sb = document.createElement('button'); sb.className = 'btn'; sb.textContent = save.sound ? '🔊 Suara: Nyala' : '🔇 Suara: Mati';
+    sb.onclick = () => { save.sound = !save.sound; Sfx.enabled = save.sound; persist(); renderPhone(); };
+    const rb = document.createElement('button'); rb.className = 'btn warn'; rb.style.marginLeft = '8px'; rb.textContent = 'Reset progres';
+    rb.onclick = () => { if (confirm('Hapus semua progres?')) { const snd = save.sound; save = defSave(); save.sound = snd; save.tut = true; persist(); hud(); renderPhone(); } };
+    body.appendChild(sb); body.appendChild(rb);
+  }
+}
+
+/* ---------- Tombol aksi ---------- */
+$('#btnAct').onclick = () => {
+  Sfx.init(); if (state !== 'play' || !actionTarget) return; Sfx.click();
+  const tg = actionTarget;
+  if (tg.npc) { toast(`<b>${tg.npc.emo} ${tg.npc.name}:</b> "${tg.npc.line}"`, 4500); Sfx.notif(); lastNpc = tg.npc; return; }
+  if (tg.office) { openPhone(); return; }
+  startMiniGame(tg);
+};
+
+/* ---------- Update ---------- */
+function update(dt) {
+  t += dt;
+  if (toastT > 0) { toastT -= dt; if (toastT <= 0) show('#toast', false); }
+  if (state !== 'play') return;
+  // input
+  let ix = 0, iy = 0;
+  const k = input.keys;
+  if (k.arrowleft || k.a) ix -= 1; if (k.arrowright || k.d) ix += 1; if (k.arrowup || k.w) iy -= 1; if (k.arrowdown || k.s) iy += 1;
+  const j = input.joy;
+  if (j) { const dx = j.x - j.ox, dy = j.y - j.oy, d = Math.hypot(dx, dy); if (d > 6) { const m = Math.min(1, d / 50); ix = dx / d * m; iy = dy / d * m; } }
+  const mag = Math.min(1, Math.hypot(ix, iy));
+  const maxV = 190;
+  if (mag > 0.05) { player.a = Math.atan2(iy, ix); player.v += (maxV * mag - player.v) * Math.min(1, dt * 4); }
+  else player.v *= Math.pow(0.02, dt);
+  const nx = player.x + Math.cos(player.a) * player.v * dt, ny = player.y + Math.sin(player.a) * player.v * dt;
+  if (!World.collides(nx, ny, 11)) { player.x = nx; player.y = ny; }
+  else if (!World.collides(nx, player.y, 11)) player.x = nx;
+  else if (!World.collides(player.x, ny, 11)) player.y = ny;
+  else player.v *= 0.5;
+
+  // timer misi
+  if (active) {
+    active.timeLeft -= dt;
+    const tl = $('#hTimer'); tl.textContent = fmtTime(active.timeLeft); tl.classList.toggle('warn', active.timeLeft < 20);
+    if (active.timeLeft < 10 && Math.floor(active.timeLeft + dt) !== Math.floor(active.timeLeft)) Sfx.tick();
+    if (active.timeLeft <= 0) { finish(false); return; }
+    if (active.m.type === 'teknik' && active.phase === 'area' && Math.hypot(player.x - active.m.center.x, player.y - active.m.center.y) < 150) {
+      active.phase = 'find'; Sfx.notif(); toast(`📞 Warga: "Tadi ada bunyi letupan dan percikan api dekat <b>${active.m.nearName}</b>!" Periksa tiang/trafo bertanda ❓`, 5000);
+    }
+  } else {
+    notifT -= dt;
+    if (notifT <= 0) { notifT = 30; show('#phoneDot', true); Sfx.notif(); toast('<span class="pm-ico sm" style="color:#ffd400"></span> <b>PLN Mobile:</b> ada laporan/permohonan baru dari pelanggan. Buka <b>📱 HP</b> untuk ambil misi.'); }
+  }
+  // target aksi terdekat
+  actionTarget = null; let best = 999;
+  targets().forEach(tg => { if (tg.area) return; const d = Math.hypot(tg.x - player.x, tg.y - player.y); if (d < 52 && d < best) { best = d; actionTarget = tg; } });
+  if (!actionTarget) World.NPCS.forEach(n => { const d = Math.hypot(n.x - player.x, n.y - player.y); if (d < 42 && d < best) { best = d; actionTarget = { npc: n, label: '💬 Ngobrol' }; } });
+  if (!actionTarget && !active) { const d = World.office.door; if (Math.hypot(d.x - player.x, d.y - player.y) < 45) actionTarget = { office: true, label: '📋 Papan Misi' }; }
+  const btn = $('#btnAct');
+  if (actionTarget) { btn.textContent = actionTarget.label || (actionTarget.pole ? '🔍 Periksa' : '🔧 Mulai Tugas'); if (!actionTarget.npc && !actionTarget.office && !actionTarget.pole) btn.textContent = '🔧 ' + actionTarget.label; if (actionTarget.pole) btn.textContent = '🔍 Periksa'; }
+  show('#btnAct', !!actionTarget);
+  if (Math.floor(t * 4) !== Math.floor((t - dt) * 4)) updateObjective();
+}
+
+/* ---------- Render ---------- */
+function blackoutSet() {
+  if (!active || active.m.type !== 'teknik') return null;
+  const m = active.m; return b => Math.hypot(b.x + b.w / 2 - m.center.x, b.y + b.h / 2 - m.center.y) < m.radius;
+}
+function drawBike(x, y, a) {
+  c.save(); c.translate(x, y); c.rotate(a);
+  c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(3, 4, 18, 9, 0, 0, 7); c.fill();
+  c.fillStyle = '#111827'; c.fillRect(-17, -3, 8, 6); c.fillRect(10, -3, 8, 6); // roda
+  c.fillStyle = '#0b3d91'; World.rr(c, -12, -7, 24, 14, 5); c.fill();
+  c.fillStyle = '#ffd400'; c.fillRect(-12, -2, 24, 4);
+  c.fillStyle = '#e5e7eb'; c.fillRect(-16, -9, 6, 18); // box perkakas
+  c.fillStyle = '#9ca3af'; c.fillRect(8, -9, 3, 18); // stang
+  c.fillStyle = '#1e3a8a'; c.beginPath(); c.arc(0, 0, 6.5, 0, 7); c.fill(); // badan
+  c.fillStyle = '#ffd400'; c.beginPath(); c.arc(1, 0, 5, 0, 7); c.fill(); // helm
+  c.fillStyle = '#fff59d'; c.beginPath(); c.moveTo(18, -4); c.lineTo(40, -14); c.lineTo(40, 14); c.lineTo(18, 4); c.closePath(); c.globalAlpha = .25; c.fill(); c.globalAlpha = 1;
+  c.restore();
+}
+function render() {
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  c.fillStyle = '#4c9a45'; c.fillRect(0, 0, VW, VH);
+  const vw = VW / scale, vh = VH / scale;
+  cam.x = Math.max(0, Math.min(World.W - vw, player.x - vw / 2)); cam.y = Math.max(0, Math.min(World.H - vh, player.y - vh / 2));
+  if (vw > World.W) cam.x = (World.W - vw) / 2;
+  c.setTransform(DPR * scale, 0, 0, DPR * scale, -cam.x * scale * DPR, -cam.y * scale * DPR);
+  World.drawGround(c);
+  const dark = blackoutSet();
+  World.T.forEach(tr => World.drawTree(c, tr));
+  World.B.forEach(b => World.drawBuilding(c, b, dark && dark(b), t));
+  World.drawLines(c);
+  const m = active && active.m;
+  World.P.forEach(p => World.drawPole(c, p, t, m && m.type === 'teknik' && active.phase === 'find' && p === m.faulty && Math.hypot(p.x - player.x, p.y - player.y) < 170));
+  World.NPCS.forEach(n => World.drawNpc(c, n, t));
+  if (dark) { // area padam
+    c.fillStyle = 'rgba(15,23,42,.28)'; c.beginPath(); c.arc(m.center.x, m.center.y, m.radius, 0, 7); c.fill();
+  }
+  // penanda target
+  targets().forEach(tg => {
+    const pulse = 1 + Math.sin(t * 5) * 0.15;
+    if (tg.area) {
+      c.strokeStyle = '#ffd400'; c.lineWidth = 4; c.setLineDash([12, 10]); c.lineDashOffset = -t * 30; c.beginPath(); c.arc(tg.x, tg.y, 150, 0, 7); c.stroke(); c.setLineDash([]);
+      c.font = 'bold 16px sans-serif'; c.textAlign = 'center'; c.fillStyle = '#fff'; c.strokeStyle = '#0f172a'; c.lineWidth = 4; c.strokeText('AREA PADAM', tg.x, tg.y - 40); c.fillText('AREA PADAM', tg.x, tg.y - 40);
+      return;
+    }
+    c.fillStyle = 'rgba(255,212,0,.35)'; c.beginPath(); c.arc(tg.x, tg.y, 18 * pulse, 0, 7); c.fill();
+    c.strokeStyle = '#ffd400'; c.lineWidth = 3; c.beginPath(); c.arc(tg.x, tg.y, 18 * pulse, 0, 7); c.stroke();
+    const by = tg.y - 38 + Math.sin(t * 6) * 5;
+    c.fillStyle = '#ffd400'; c.strokeStyle = '#0b3d91'; c.lineWidth = 2.5;
+    c.beginPath(); c.moveTo(tg.x - 11, by - 12); c.lineTo(tg.x + 11, by - 12); c.lineTo(tg.x, by + 6); c.closePath(); c.fill(); c.stroke();
+    if (tg.pole) { c.fillStyle = '#0b3d91'; c.font = 'bold 14px sans-serif'; c.textAlign = 'center'; c.fillText('?', tg.x, by - 1); }
+  });
+  // pintu posko (saat tanpa misi)
+  if (!active) { const d = World.office.door; c.fillStyle = 'rgba(11,61,145,.25)'; c.beginPath(); c.arc(d.x, d.y, 16, 0, 7); c.fill(); }
+  drawBike(player.x, player.y, player.a);
+
+  // layar: panah tepi menuju target
+  c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const tg = targets()[0];
+  if (tg) {
+    const sx = (tg.x - cam.x) * scale, sy = (tg.y - cam.y) * scale, pad = 34, top = 130;
+    if (sx < 0 || sy < top - 20 || sx > VW || sy > VH) {
+      const cx = VW / 2, cy = VH / 2, ang = Math.atan2(sy - cy, sx - cx);
+      const ex = Math.max(pad, Math.min(VW - pad, sx)), ey = Math.max(top, Math.min(VH - pad - 70, sy));
+      c.save(); c.translate(ex, ey); c.rotate(ang);
+      c.fillStyle = '#ffd400'; c.strokeStyle = '#0b3d91'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(18, 0); c.lineTo(-10, -13); c.lineTo(-4, 0); c.lineTo(-10, 13); c.closePath(); c.fill(); c.stroke(); c.restore();
+    }
+  }
+  // joystick
+  const j = input.joy;
+  if (j && state === 'play') {
+    c.fillStyle = 'rgba(255,255,255,.18)'; c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 2;
+    c.beginPath(); c.arc(j.ox, j.oy, 50, 0, 7); c.fill(); c.stroke();
+    const dx = j.x - j.ox, dy = j.y - j.oy, d = Math.min(50, Math.hypot(dx, dy)), a = Math.atan2(dy, dx);
+    c.fillStyle = 'rgba(255,212,0,.85)'; c.beginPath(); c.arc(j.ox + Math.cos(a) * d, j.oy + Math.sin(a) * d, 22, 0, 7); c.fill();
+  } else if (state === 'play' && !active && t < 30) {
+    c.fillStyle = 'rgba(255,255,255,.75)'; c.font = '600 13px sans-serif'; c.textAlign = 'center';
+    c.fillText('Sentuh & geser layar untuk jalan', (VW - 90) / 2, VH - 30);
+  }
+}
+
+let last = performance.now();
+function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; update(dt); render(); requestAnimationFrame(loop); }
+
+/* ---------- Layar mulai ---------- */
+function startGame() {
+  Sfx.init(); Sfx.ok();
+  show('#start', false); show('#tut', false); show('#hud', true); show('#btnPhone', true);
+  state = 'play'; hud(); if (!offers.length) refreshOffers(); updateObjective();
+  setTimeout(() => { if (!active && state === 'play') { show('#phoneDot', true); Sfx.notif(); toast('<b>Selamat bertugas!</b> Buka <b>📱 HP</b> untuk ambil misi. Ada permohonan pelanggan yang masuk lewat <b>PLN Mobile</b>.', 4500); } }, 700);
+}
+$('#btnStart').onclick = () => { if (!save.tut) { save.tut = true; persist(); Sfx.init(); show('#start', false); show('#tut', true); return; } startGame(); };
+$('#btnTut').onclick = () => { Sfx.init(); Sfx.click(); show('#tut', true); };
+$('#btnTutClose').onclick = () => { show('#tut', false); startGame(); };
+$('#startTip').innerHTML = `<span class="pm-ico" style="color:#ffd400;width:22px;height:32px"></span><div>${pick(PM_TIPS)}</div>`;
+$('#startStats').textContent = save.points ? `Progres tersimpan: ${save.points} poin · ${RANKS[rankIdx(save.points)][0]}` : 'Progres disimpan otomatis di perangkat ini.';
+
+hud(); refreshOffers(); requestAnimationFrame(loop);
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+/* Hook kecil untuk pengujian otomatis (tidak dipakai saat main biasa) */
+window.__game = { get state() { return state; }, get active() { return active; }, get offers() { return offers; }, player, accept, startGame, targets,
+  teleport(x, y) { player.x = x; player.y = y; } };
+
+</script>
+</body>
+</html>
