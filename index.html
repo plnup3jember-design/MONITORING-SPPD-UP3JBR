@@ -130,6 +130,16 @@
             outline: 3px solid var(--pln-yellow);
             outline-offset: 3px;
         }
+        .splash { position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:24px; text-align:center;
+            background:radial-gradient(circle at 50% 30%, #0c6a9c 0%, #0a4a73 55%, #06304d 100%); color:#fff; transition:opacity .45s ease, visibility .45s ease; }
+        .splash.hide { opacity:0; visibility:hidden; pointer-events:none; }
+        .splash .bolt { width:84px; height:84px; border-radius:24px; background:#ffd23f; display:grid; place-items:center; box-shadow:0 10px 30px rgba(0,0,0,.3); animation:splashPulse 2s ease-in-out infinite; }
+        .splash .bolt svg { width:48px; height:48px; fill:#0a4a73; }
+        .splash h1 { margin:0; font-size:clamp(26px,6vw,40px); line-height:1.15; }
+        .splash p { margin:0; opacity:.85; font-size:15px; }
+        .splash button { margin-top:6px; border:0; border-radius:999px; padding:16px 46px; font-size:18px; font-weight:800; letter-spacing:.08em; background:#ffd23f; color:#0a4a73; cursor:pointer; box-shadow:0 8px 24px rgba(0,0,0,.3); }
+        .splash button:active { transform:scale(.97); }
+        @keyframes splashPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
         .tile-note { display:block; margin-top:12px; font-size:13px; font-weight:700; color:#087dac; font-style:italic; }
         .tile.soon {
             background: #f6f8fa;
@@ -257,6 +267,12 @@
     </style>
 </head>
 <body>
+    <div id="splash" class="splash" role="dialog" aria-label="Selamat datang">
+        <div class="bolt"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18 2L6 18h8l-2 12 14-18h-8L18 2z"/></svg></div>
+        <h1>Monitoring PLN UP3 Jember</h1>
+        <p>Selamat datang! Ketuk tombol di bawah untuk masuk.</p>
+        <button type="button" id="splashEnter">MASUK</button>
+    </div>
     <div class="hero-band">
         <div class="bar" aria-hidden="true"></div>
         <div class="wrap">
@@ -274,7 +290,7 @@
             <div class="grid" id="appGrid"></div>
         </section>
 
-        <footer>PLN UP3 Jember © 2026</footer>
+        <footer>PLN UP3 Jember Â© 2026</footer>
     </div>
 
 
@@ -471,6 +487,7 @@
                     }
                     // Paling agresif: langsung putar dengan suara.
                     bgmPlayLoud();
+                    if (bgmEntered) { bgmSetUi(false); return; }
                     bgmSetUi(false);
                     setTimeout(bgmCheckAutoplay, 250);
                     setTimeout(bgmCheckAutoplay, 800);
@@ -493,6 +510,17 @@
         });
     }
     window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+    /* ==== LAYAR PEMBUKA: ketuk MASUK = musik langsung bunyi ==== */
+    let bgmEntered = false;
+    document.getElementById('splashEnter').addEventListener('click', function () {
+        bgmEntered = true;
+        document.getElementById('splash').classList.add('hide');
+        if (bgmUnavailable || bgmUserMuted()) return;
+        bgmWaitingGesture = false;
+        bgmShowHint(false);
+        if (bgmPlayer) { bgmPlayLoud(); bgmSetUi(false); }
+    });
 
     bgmToggle.addEventListener('click', function (ev) {
         ev.preventDefault();
