@@ -3,92 +3,512 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Monitoring SPPD UP3 JEMBER</title>
-
+    <title>Monitoring PLN UP3 Jember</title>
+    <meta name="description" content="Portal layanan digital Monitoring PLN UP3 Jember.">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Monitoring SPPD UP3 JEMBER">
-    <meta property="og:description" content="Layanan Digital Pengajuan, Monitoring dan Restitusi SPPD Pegawai UP3 Jember.">
+    <meta property="og:title" content="Monitoring PLN UP3 Jember">
+    <meta property="og:description" content="Portal layanan digital Monitoring PLN UP3 Jember.">
     <meta property="og:image" content="https://plnup3jember-design.github.io/MONITORING-SPPD-UP3JBR/preview.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:url" content="https://plnup3jember-design.github.io/MONITORING-SPPD-UP3JBR/">
     <meta property="og:locale" content="id_ID">
-
-    <meta http-equiv="refresh" content="0;url=https://script.google.com/macros/s/AKfycby6Piuyj600XjPr8rt12S157usBZlrvuc4gyyY_gEDnhaYgHGKC9NI5hP1fANZ0iRPkVA/exec">
-    <link rel="canonical" href="https://script.google.com/macros/s/AKfycby6Piuyj600XjPr8rt12S157usBZlrvuc4gyyY_gEDnhaYgHGKC9NI5hP1fANZ0iRPkVA/exec">
-    <script>
-        location.replace('https://script.google.com/macros/s/AKfycby6Piuyj600XjPr8rt12S157usBZlrvuc4gyyY_gEDnhaYgHGKC9NI5hP1fANZ0iRPkVA/exec');
-    </script>
-
+    <link rel="icon" href="preview.jpg">
     <style>
-        body {
+        :root {
+            --pln-blue: #0078b7;
+            --pln-blue-dark: #0a4d7c;
+            --pln-blue-deep: #06385c;
+            --pln-yellow: #ffce38;
+            --pln-yellow-dark: #e0b000;
+            --sky: #e8f5fc;
+            --ink: #102b48;
+            --muted: #4d6a82;
+            --card: #ffffff;
+        }
+        * { box-sizing: border-box; }
+        html, body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #eaf8ff, #b4e2f7);
+            padding: 0;
+            overflow-x: hidden;
+            max-width: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            font: 16px/1.55 Arial, Helvetica, sans-serif;
+            color: var(--ink);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(180deg, var(--sky), #f7fbfe 40%, #fff8d6 100%);
         }
-
-        .card {
-            background: white;
-            padding: 35px;
-            border-radius: 24px;
-            text-align: center;
-            width: 85%;
-            max-width: 420px;
-            box-sizing: border-box;
-            box-shadow: 0 15px 40px rgba(0,90,150,0.15);
+        .hero-band {
+            background: var(--pln-blue-dark);
+            color: #fff;
         }
-
-        h1 {
-            color: #0078b7;
-            font-size: 28px;
+        .bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--pln-yellow), #ffe98a 50%, var(--pln-yellow-dark));
         }
-
-        p {
-            color: #526779;
-            line-height: 1.6;
+        .wrap {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 20px 48px;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
         }
-
-        .button {
-            display: block;
-            background: #008dc9;
-            color: white;
-            padding: 16px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: bold;
+        header.hero {
+            color: #fff;
+            padding: 18px 0 36px;
         }
-
-        .footer {
+        .eyebrow {
+            display: inline-block;
+            background: var(--pln-yellow);
+            color: var(--pln-blue-deep);
+            font-weight: 800;
             font-size: 12px;
-            margin-top: 25px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            margin: 0 0 10px;
+            font-size: clamp(28px, 5vw, 52px);
+            line-height: 1.15;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            max-width: 16ch;
+        }
+        .lede {
+            margin: 0;
+            max-width: 36em;
+            color: #e3f2fb;
+            font-size: clamp(15px, 2vw, 18px);
+        }
+        .panel {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 28px 24px 32px;
+            box-shadow: 0 18px 40px rgba(6, 56, 92, 0.12);
+        }
+        .panel h2 {
+            margin: 0 0 6px;
+            font-size: 20px;
+            color: var(--pln-blue-dark);
+        }
+        .panel .hint {
+            margin: 0 0 22px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .tile {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+            background: linear-gradient(180deg, #f4fbff, #fff);
+            border: 1px solid #d5e8f4;
+            border-radius: 20px;
+            padding: 20px 18px 18px;
+            min-height: 180px;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+        a.tile:hover, a.tile:focus-visible {
+            transform: translateY(-3px);
+            border-color: var(--pln-blue);
+            box-shadow: 0 12px 24px rgba(0, 120, 183, 0.16);
+            outline: none;
+        }
+        a.tile:focus-visible {
+            outline: 3px solid var(--pln-yellow);
+            outline-offset: 3px;
+        }
+        .tile.soon {
+            background: #f6f8fa;
+            cursor: default;
+            opacity: 0.92;
+        }
+        .icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(145deg, var(--pln-blue), #0a93c9);
+            box-shadow: 0 6px 0 var(--pln-blue-deep);
+        }
+        .tile.soon .icon {
+            background: linear-gradient(145deg, #8aa4b8, #6b8496);
+            box-shadow: 0 6px 0 #4d6475;
+        }
+        .icon svg { width: 30px; height: 30px; fill: var(--pln-yellow); }
+        .tile h3 {
+            margin: 8px 0 0;
+            font-size: 18px;
+            color: var(--pln-blue-dark);
+        }
+        .tile p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            flex: 1;
+        }
+        .badge {
+            align-self: flex-start;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            background: var(--pln-yellow);
+            color: var(--pln-blue-deep);
+            border-radius: 999px;
+            padding: 5px 10px;
+        }
+        .tile.soon .badge {
+            background: #e6edf2;
+            color: #4d6475;
+        }
+        footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 28px;
+        }
+        .hero-band .wrap { padding-bottom: 36px; }
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 600px) {
+            .wrap { padding: 18px 14px 36px; }
+            .panel { padding: 20px 16px 24px; border-radius: 20px; }
+            .grid { grid-template-columns: 1fr; gap: 12px; }
+            .tile { min-height: 0; }
+            h1 { max-width: none; }
+        }
+
+        .yt-bg {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            left: 0;
+            bottom: 0;
+        }
+        .bgm-toggle {
+            position: fixed;
+            right: max(16px, env(safe-area-inset-right));
+            bottom: max(16px, env(safe-area-inset-bottom));
+            z-index: 40;
+            width: 56px;
+            height: 56px;
+            border: 0;
+            border-radius: 50%;
+            background: var(--pln-blue-dark);
+            color: var(--pln-yellow);
+            box-shadow: 0 8px 22px rgba(6, 56, 92, 0.28);
+            cursor: pointer;
+            display: none;
+            place-items: center;
+            padding: 0;
+        }
+        .bgm-toggle.is-on { display: grid; }
+        .bgm-toggle svg { width: 26px; height: 26px; fill: currentColor; }
+        .bgm-toggle:focus-visible {
+            outline: 3px solid var(--pln-yellow);
+            outline-offset: 3px;
+        }
+        .bgm-toggle .icon-muted { display: none; }
+        .bgm-toggle.is-muted .icon-on { display: none; }
+        .bgm-toggle.is-muted .icon-muted { display: block; }
+        .bgm-hint {
+            position: fixed;
+            right: max(80px, calc(16px + env(safe-area-inset-right) + 64px));
+            bottom: max(26px, calc(16px + env(safe-area-inset-bottom) + 10px));
+            z-index: 40;
+            display: none;
+            background: var(--pln-yellow);
+            color: var(--pln-blue-deep);
+            font-weight: 800;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            box-shadow: 0 8px 20px rgba(6, 56, 92, 0.18);
+            pointer-events: none;
+        }
+        .bgm-hint.is-on { display: block; }
+        @media (max-width: 600px) {
+            .bgm-hint {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: max(80px, calc(16px + env(safe-area-inset-bottom) + 64px));
+            }
         }
     </style>
 </head>
-
 <body>
+    <div class="hero-band">
+        <div class="bar" aria-hidden="true"></div>
+        <div class="wrap">
+            <header class="hero">
+                <div class="eyebrow">Portal layanan</div>
+                <h1>Monitoring PLN UP3 Jember</h1>
+                <p class="lede">Satu pintu untuk aplikasi monitoring internal UP3 Jember. Pilih layanan di bawah untuk mulai.</p>
+            </header>
+        </div>
+    </div>
+    <div class="wrap">
+        <section class="panel">
+            <h2>Aplikasi</h2>
+            <p class="hint">Layanan yang sudah aktif dapat dibuka langsung. Layanan baru akan muncul di grid yang sama.</p>
+            <div class="grid" id="appGrid"></div>
+        </section>
 
-    <div class="card">
-
-        <h1>Monitoring SPPD UP3 JEMBER</h1>
-
-        <p>
-            Membuka aplikasi Monitoring SPPD...
-        </p>
-
-        <a class="button" href="https://script.google.com/macros/s/AKfycby6Piuyj600XjPr8rt12S157usBZlrvuc4gyyY_gEDnhaYgHGKC9NI5hP1fANZ0iRPkVA/exec">
-            Masuk Monitoring SPPD
-        </a>
-
-        <p class="footer">
-            PLN UP3 Jember © 2026
-        </p>
-
+        <footer>PLN UP3 Jember © 2026</footer>
     </div>
 
+
+    <div id="ytBgHost" class="yt-bg" aria-hidden="true"></div>
+    <button type="button" id="bgmToggle" class="bgm-toggle" aria-pressed="false" aria-label="Matikan musik" hidden>
+        <svg class="icon-on" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 12h5l7-6v20l-7-6H6V12zm16.2-2.2 1.8-1.8a11 11 0 0 1 0 16l-1.8-1.8a8.5 8.5 0 0 0 0-12.4zM20 12.7l1.7-1.7a7 7 0 0 1 0 9.9L20 19.3a4.6 4.6 0 0 0 0-6.6z"/></svg>
+        <svg class="icon-muted" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 12h5l7-6v20l-7-6H6V12zm18.2 1.2 2.1-2.1 1.4 1.4-2.1 2.1 2.1 2.1-1.4 1.4-2.1-2.1-2.1 2.1-1.4-1.4 2.1-2.1-2.1-2.1 1.4-1.4 2.1 2.1z"/></svg>
+    </button>
+    <div id="bgmHint" class="bgm-hint" hidden>Ketuk untuk musik</div>
+
+    <script>
+    /* ==== DAFTAR APLIKASI ====
+       Tambah aplikasi baru dengan menyalin satu objek di array APPS.
+       id          : identitas unik
+       title       : nama di kotak
+       description : ringkasan singkat
+       href        : tautan (null jika belum siap)
+       status      : 'live' bisa dibuka, 'soon' tampil "Segera hadir"
+       icon        : 'sppd' | 'gangguan' | atau nama ikon baru di ICONS
+    */
+    const APPS = [
+        {
+            id: 'sppd',
+            title: 'Monitoring SPPD',
+            description: 'Pengajuan, pemantauan, dan restitusi SPPD pegawai.',
+            href: 'https://script.google.com/macros/s/AKfycby6Piuyj600XjPr8rt12S157usBZlrvuc4gyyY_gEDnhaYgHGKC9NI5hP1fANZ0iRPkVA/exec',
+            status: 'live',
+            icon: 'sppd'
+        },
+        {
+            id: 'gangguan',
+            title: 'Monitoring Gangguan',
+            description: 'Pantau dan catat gangguan jaringan secara terpadu.',
+            href: null,
+            status: 'soon',
+            icon: 'gangguan'
+        }
+    ];
+    /* ==== AKHIR DAFTAR APLIKASI ==== */
+
+    const ICONS = {
+        sppd: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 3h10l7 7v19H9V3zm9 1.8V11h6.2L18 4.8zM12 15h12v2H12v-2zm0 5h12v2H12v-2zm0 5h8v2h-8v-2z"/></svg>',
+        gangguan: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18 2L6 18h8l-2 12 14-18h-8L18 2z"/></svg>'
+    };
+
+    const grid = document.getElementById('appGrid');
+    APPS.forEach(function (app) {
+        const soon = app.status !== 'live' || !app.href;
+        const el = document.createElement(soon ? 'div' : 'a');
+        el.className = 'tile' + (soon ? ' soon' : '');
+        if (!soon) {
+            el.href = app.href;
+        }
+        el.innerHTML =
+            '<div class="icon">' + (ICONS[app.icon] || ICONS.sppd) + '</div>' +
+            '<h3></h3><p></p>' +
+            '<span class="badge"></span>';
+        el.querySelector('h3').textContent = app.title;
+        el.querySelector('p').textContent = app.description;
+        el.querySelector('.badge').textContent = soon ? 'Segera hadir' : 'Buka aplikasi';
+        grid.appendChild(el);
+    });
+
+
+    /* ==== MUSIK LATAR (YouTube IFrame Player API) ==== */
+    const BGM_VIDEO_ID = 'c5-K6CVRY0U';
+    const BGM_STORAGE_KEY = 'up3jbr-portal-bgm-muted';
+    const bgmToggle = document.getElementById('bgmToggle');
+    const bgmHint = document.getElementById('bgmHint');
+    let bgmPlayer = null;
+    let bgmWaitingGesture = false;
+    let bgmUnavailable = false;
+    let bgmGestureArmed = false;
+
+    function bgmUserMuted() {
+        try { return localStorage.getItem(BGM_STORAGE_KEY) === '1'; } catch (e) { return false; }
+    }
+    function bgmSaveMuted(muted) {
+        try { localStorage.setItem(BGM_STORAGE_KEY, muted ? '1' : '0'); } catch (e) {}
+    }
+    function bgmShowToggle() {
+        bgmToggle.hidden = false;
+        bgmToggle.classList.add('is-on');
+    }
+    function bgmHideAll() {
+        bgmUnavailable = true;
+        bgmToggle.hidden = true;
+        bgmToggle.classList.remove('is-on');
+        bgmHint.hidden = true;
+        bgmHint.classList.remove('is-on');
+        const host = document.getElementById('ytBgHost');
+        if (host) host.style.display = 'none';
+    }
+    function bgmShowHint(on) {
+        bgmHint.hidden = !on;
+        bgmHint.classList.toggle('is-on', !!on);
+    }
+    function bgmSetUi(muted) {
+        bgmToggle.classList.toggle('is-muted', !!muted);
+        bgmToggle.setAttribute('aria-pressed', muted ? 'true' : 'false');
+        bgmToggle.setAttribute('aria-label', muted ? 'Nyalakan musik' : 'Matikan musik');
+    }
+    function bgmPlayLoud() {
+        if (!bgmPlayer) return;
+        try { bgmPlayer.unMute(); bgmPlayer.setVolume(100); } catch (e) {}
+        try { bgmPlayer.playVideo(); } catch (e) {}
+    }
+    function bgmPlayMuted() {
+        if (!bgmPlayer) return;
+        try { bgmPlayer.mute(); } catch (e) {}
+        try { bgmPlayer.playVideo(); } catch (e) {}
+    }
+    function bgmIsSilent() {
+        try {
+            return !bgmPlayer || bgmPlayer.isMuted() || bgmPlayer.getVolume() === 0;
+        } catch (e) { return true; }
+    }
+    function bgmIsPlaying() {
+        try {
+            const s = bgmPlayer.getPlayerState();
+            return s === YT.PlayerState.PLAYING || s === YT.PlayerState.BUFFERING;
+        } catch (e) { return false; }
+    }
+    function bgmStartMutedFallback() {
+        if (bgmUserMuted() || bgmUnavailable) return;
+        bgmPlayMuted();
+        bgmWaitingGesture = true;
+        bgmSetUi(true);
+        bgmShowHint(true);
+        bgmArmGesture();
+    }
+    function bgmCheckAutoplay() {
+        if (bgmUnavailable || bgmUserMuted() || bgmWaitingGesture) return;
+        if (!bgmIsPlaying() || bgmIsSilent()) bgmStartMutedFallback();
+    }
+    function bgmArmGesture() {
+        if (bgmGestureArmed) return;
+        bgmGestureArmed = true;
+        const evts = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'mousemove'];
+        const onFirst = function () {
+            evts.forEach(function (ev) { window.removeEventListener(ev, onFirst, true); });
+            bgmGestureArmed = false;
+            if (bgmUnavailable || !bgmPlayer || bgmUserMuted()) return;
+            bgmWaitingGesture = false;
+            bgmShowHint(false);
+            bgmPlayLoud();
+            bgmSaveMuted(false);
+            bgmSetUi(false);
+        };
+        evts.forEach(function (ev) {
+            window.addEventListener(ev, onFirst, { capture: true, passive: true });
+        });
+    }
+    function onYouTubeIframeAPIReady() {
+        if (bgmUnavailable) return;
+        bgmPlayer = new YT.Player('ytBgHost', {
+            videoId: BGM_VIDEO_ID,
+            width: 1,
+            height: 1,
+            host: 'https://www.youtube.com',
+            playerVars: {
+                autoplay: 1,
+                mute: bgmUserMuted() ? 1 : 0,
+                loop: 1,
+                playlist: BGM_VIDEO_ID,
+                controls: 0,
+                disablekb: 1,
+                fs: 0,
+                modestbranding: 1,
+                playsinline: 1,
+                rel: 0,
+                origin: location.origin
+            },
+            events: {
+                onReady: function () {
+                    bgmShowToggle();
+                    if (bgmUserMuted()) {
+                        bgmPlayMuted();
+                        bgmSetUi(true);
+                        return;
+                    }
+                    // Paling agresif: langsung putar dengan suara.
+                    bgmPlayLoud();
+                    bgmSetUi(false);
+                    setTimeout(bgmCheckAutoplay, 250);
+                    setTimeout(bgmCheckAutoplay, 800);
+                    setTimeout(bgmCheckAutoplay, 1600);
+                },
+                onError: function (e) {
+                    // 101/150: embedding dimatikan pemilik video; 100: tidak ditemukan; lainnya: gagal diputar.
+                    bgmHideAll();
+                },
+                onStateChange: function (e) {
+                    if (bgmUnavailable) return;
+                    if (e.data === YT.PlayerState.ENDED) {
+                        try { bgmPlayer.seekTo(0, true); bgmPlayer.playVideo(); } catch (err) {}
+                    }
+                    if (!bgmUserMuted() && !bgmWaitingGesture && e.data === YT.PlayerState.PLAYING && bgmIsSilent()) {
+                        bgmStartMutedFallback();
+                    }
+                }
+            }
+        });
+    }
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+    bgmToggle.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (!bgmPlayer || bgmUnavailable) return;
+        const currentlySilent = bgmToggle.classList.contains('is-muted') || bgmWaitingGesture || bgmIsSilent();
+        if (currentlySilent) {
+            bgmWaitingGesture = false;
+            bgmShowHint(false);
+            bgmSaveMuted(false);
+            bgmPlayLoud();
+            bgmSetUi(false);
+        } else {
+            bgmWaitingGesture = false;
+            bgmShowHint(false);
+            bgmSaveMuted(true);
+            bgmPlayMuted();
+            bgmSetUi(true);
+        }
+    });
+
+    const bgmApi = document.createElement('script');
+    bgmApi.src = 'https://www.youtube.com/iframe_api';
+    bgmApi.async = true;
+    bgmApi.onerror = bgmHideAll;
+    document.head.appendChild(bgmApi);
+    setTimeout(function () {
+        if (!bgmPlayer && !bgmUnavailable) bgmHideAll();
+    }, 10000);
+    /* ==== AKHIR MUSIK LATAR ==== */
+    </script>
 </body>
 </html>
