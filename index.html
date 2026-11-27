@@ -130,6 +130,7 @@
             outline: 3px solid var(--pln-yellow);
             outline-offset: 3px;
         }
+        .tile-note { display:block; margin-top:12px; font-size:13px; font-weight:700; color:#087dac; font-style:italic; }
         .tile.soon {
             background: #f6f8fa;
             cursor: default;
@@ -304,23 +305,35 @@
             icon: 'sppd'
         },
         {
+            id: 'plnhero',
+            title: 'Game PLN Hero',
+            description: 'Jadi petugas PLN: cari gangguan, pasang baru, catat meter, dan cek pelanggan.',
+            note: 'Lagi nggak mau entri SPPD? Main game aja dulu! \uD83C\uDFAE',
+            href: 'https://script.google.com/macros/s/AKfycbzoKrnkdWlDzG00D4RIFRCjLrn6vIrtfX-pvcIH5Jx6iQFC2y2-_zKGAj4VACuZ4Vmnow/exec',
+            status: 'live',
+            icon: 'game'
+        },
+        {
+            /* Opsi nanti: ubah hidden ke false untuk menampilkan */
             id: 'gangguan',
             title: 'Monitoring Gangguan',
             description: 'Pantau dan catat gangguan jaringan secara terpadu.',
             href: null,
             status: 'soon',
-            icon: 'gangguan'
+            icon: 'gangguan',
+            hidden: true
         }
     ];
     /* ==== AKHIR DAFTAR APLIKASI ==== */
 
     const ICONS = {
         sppd: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 3h10l7 7v19H9V3zm9 1.8V11h6.2L18 4.8zM12 15h12v2H12v-2zm0 5h12v2H12v-2zm0 5h8v2h-8v-2z"/></svg>',
+        game: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 9h14a7 7 0 0 1 0 14c-2 0-3-1-4-2h-6c-1 1-2 2-4 2A7 7 0 0 1 9 9zm1 4v2H8v2h2v2h2v-2h2v-2h-2v-2h-2zm11 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm3-2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>',
         gangguan: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18 2L6 18h8l-2 12 14-18h-8L18 2z"/></svg>'
     };
 
     const grid = document.getElementById('appGrid');
-    APPS.forEach(function (app) {
+    APPS.filter(function (a) { return !a.hidden; }).forEach(function (app) {
         const soon = app.status !== 'live' || !app.href;
         const el = document.createElement(soon ? 'div' : 'a');
         el.className = 'tile' + (soon ? ' soon' : '');
@@ -333,7 +346,8 @@
             '<span class="badge"></span>';
         el.querySelector('h3').textContent = app.title;
         el.querySelector('p').textContent = app.description;
-        el.querySelector('.badge').textContent = soon ? 'Segera hadir' : 'Buka aplikasi';
+        el.querySelector('.badge').textContent = soon ? 'Segera hadir' : (app.icon === 'game' ? 'Main sekarang' : 'Buka aplikasi');
+        if (app.note) { const n = document.createElement('small'); n.className = 'tile-note'; n.textContent = app.note; el.appendChild(n); }
         grid.appendChild(el);
     });
 
